@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Quiniela Mundial 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg:#0b132b; --bg2:#1c2541; --card:#ffffff; --ink:#11182a; --muted:#6b7280;
@@ -13,7 +16,7 @@
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
   body{
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:linear-gradient(160deg,#0b132b,#1c2541 60%,#13203f);
     color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
   }
@@ -91,6 +94,26 @@
   .err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
   .ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
   h3.sec{color:#fff;margin:18px 4px 4px;font-size:15px;font-weight:800}
+  /* --- mejoras visuales --- */
+  .flag{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#eef2f7;box-shadow:0 1px 4px rgba(0,0,0,.18);flex-shrink:0}
+  .flag-lg{width:50px;height:50px}
+  .flag-ph{display:inline-flex;align-items:center;justify-content:center;font-size:24px;background:#eef2f7}
+  .team .flag{margin-bottom:2px}
+  .team span{line-height:1.15}
+  .team.sel .flag{box-shadow:0 0 0 3px #16a34a}
+  .team.win .flag{box-shadow:0 0 0 3px var(--gold)}
+  .match.tbd{opacity:.92;border-style:dashed;background:#fbfcfe}
+  .tbd-slot{display:flex;flex-direction:column;align-items:center;gap:5px;font-weight:800;color:#64748b;font-size:12.5px;text-align:center;padding:8px}
+  .round-head{display:flex;align-items:center;gap:8px;font-weight:900;font-size:17px;margin-bottom:8px;color:var(--ink);letter-spacing:-.3px}
+  .round-head .chip{background:#eef2f7;color:#475569;font-size:11px;font-weight:800;padding:2px 9px;border-radius:999px}
+  .breakdown{display:grid;gap:8px;margin-top:14px;text-align:left}
+  .brk{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:13px;background:#f8fafc;border:1px solid var(--line);font-weight:700;font-size:14px}
+  .brk .v{font-weight:900;font-size:17px}
+  .brk.prize{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+  .brk.fee{background:#fff7ed;border-color:#fed7aa;color:#9a3412}
+  .pot{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;border-radius:18px;padding:18px;text-align:center;margin:14px 0;box-shadow:0 10px 26px rgba(22,163,74,.28)}
+  .pot .amt{font-size:38px;font-weight:900;letter-spacing:-1px;margin:2px 0}
+  .lead-row .rank{font-size:16px}
 </style>
 </head>
 <body>
@@ -121,6 +144,9 @@ async function sha256hex(s){const b=await crypto.subtle.digest('SHA-256',new Tex
 function normCode(c){return (c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
 function genRecoveryCode(){const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';const r=crypto.getRandomValues(new Uint8Array(8));for(let i=0;i<8;i++)s+=a[r[i]%a.length];return s;}
 const LOCK_MS=3600*1000; // los picks cierran 1h antes
+function isDefined(m){const ph=/winner|loser|por definir|tbd/i;return !!(m.team1&&m.team2)&&!ph.test(m.team1)&&!ph.test(m.team2);}
+function flag(url,cls){return url?'<img class="flag '+(cls||'')+'" src="'+esc(url)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'">':'<span class="flag flag-ph '+(cls||'')+'">🏳️</span>';}
+function prettySlot(s){s=String(s||'');const r=/round of 32/i.test(s)?'Dieciseisavos':/round of 16/i.test(s)?'Octavos':/quarterfinal/i.test(s)?'Cuartos':/semifinal/i.test(s)?'Semifinal':'';const n=(s.match(/\d+/)||[''])[0];const w=/loser/i.test(s)?'Perdedor':/winner/i.test(s)?'Ganador':'';return r?(w+' de '+r+' '+n).trim():s;}
 
 // ---------- AUTH ----------
 function renderAuth(){
@@ -289,9 +315,21 @@ async function viewPartidos(){
   const groups=[];const idx={};
   matches.forEach(m=>{const r=m.round||'Eliminatoria';if(!(r in idx)){idx[r]=groups.length;groups.push({round:r,items:[]});}groups[idx[r]].items.push(m);});
   groups.forEach(g=>{
-    const sec=el(`<div class="card"><div style="font-weight:900;font-size:16px;margin-bottom:4px">${esc(g.round)}</div></div>`);
+    const sec=el(`<div class="card"><div class="round-head">${esc(g.round)} <span class="chip">${g.items.length}</span></div></div>`);
     g.items.forEach(m=>{
       const now=new Date();const lockAt=new Date(new Date(m.kickoff).getTime()-LOCK_MS);const locked=now>=lockAt;
+      if(!isDefined(m)){
+        sec.appendChild(el(`<div class="match tbd">
+          <div class="meta"><span class="pill round">${esc(m.round||'')}</span><span>${esc(fmtDate(m.kickoff))}</span></div>
+          <div class="teams">
+            <div class="tbd-slot"><span class="flag flag-ph flag-lg">🏳️</span>${esc(prettySlot(m.team1))}</div>
+            <div class="vs">VS</div>
+            <div class="tbd-slot"><span class="flag flag-ph flag-lg">🏳️</span>${esc(prettySlot(m.team2))}</div>
+          </div>
+          <div class="center" style="margin-top:8px"><span class="muted" style="font-size:11px">⏳ Por definirse — podrás elegir cuando se conozcan los equipos</span></div>
+        </div>`));
+        return;
+      }
       const myPick=pmap[m.id];
       const t1cls='team'+(m.result===1?' win':'')+(myPick===1?' sel':'')+(locked?' locked':'');
       const t2cls='team'+(m.result===2?' win':'')+(myPick===2?' sel':'')+(locked?' locked':'');
@@ -300,14 +338,14 @@ async function viewPartidos(){
         if(m.result){status = myPick? (myPick===m.result?'<span class="pill win">✓ Acertaste</span>':'<span class="pill lose">✗ Fallaste</span>') : '<span class="muted" style="font-size:11px">sin pick</span>';}
         else{status='<span class="muted" style="font-size:11px">🔒 En juego</span>';}
       } else {
-        status = myPick? '<span class="pill paid">Pick guardado</span>' : '<span class="muted" style="font-size:11px">elige uno</span>';
+        status = myPick? '<span class="pill paid">Pick guardado ✓</span>' : '<span class="muted" style="font-size:11px">toca quién avanza</span>';
       }
       const card=el(`<div class="match">
         <div class="meta"><span class="pill round">${esc(m.round||'')}</span><span>${esc(fmtDate(m.kickoff))}${m.venue?' · '+esc(m.venue):''}</span></div>
         <div class="teams">
-          <div class="${t1cls}" data-pick="1">${esc(m.team1)}${m.team1_code?'<small>'+esc(m.team1_code)+'</small>':''}</div>
+          <div class="${t1cls}" data-pick="1">${flag(m.team1_logo,'flag-lg')}<span>${esc(m.team1)}</span>${m.team1_code?'<small>'+esc(m.team1_code)+'</small>':''}</div>
           <div class="vs">VS</div>
-          <div class="${t2cls}" data-pick="2">${esc(m.team2)}${m.team2_code?'<small>'+esc(m.team2_code)+'</small>':''}</div>
+          <div class="${t2cls}" data-pick="2">${flag(m.team2_logo,'flag-lg')}<span>${esc(m.team2)}</span>${m.team2_code?'<small>'+esc(m.team2_code)+'</small>':''}</div>
         </div>
         <div class="center" style="margin-top:8px">${status}</div>
       </div>`);
@@ -319,7 +357,7 @@ async function viewPartidos(){
             tb.classList.add('sel');
             const {error}=await sb.from('predictions').upsert({user_id:STATE.user.id,match_id:m.id,pick},{onConflict:'user_id,match_id'});
             if(error){toast('Error al guardar');tb.classList.remove('sel');}
-            else{pmap[m.id]=pick;toast('¡Pick guardado!');card.querySelector('.center').innerHTML='<span class="pill paid">Pick guardado</span>';}
+            else{pmap[m.id]=pick;toast('¡Pick guardado!');card.querySelector('.center').innerHTML='<span class="pill paid">Pick guardado ✓</span>';}
           };
         });
       }
@@ -334,15 +372,26 @@ async function viewPartidos(){
 async function viewTabla(){
   loading();
   const {data,error}=await sb.rpc('get_leaderboard');
+  const cfg=STATE.config||{};
   const c=el('<div></div>');
   if(error){c.appendChild(el('<div class="card err">No se pudo cargar la tabla.</div>'));shell(c);return;}
-  const card=el('<div class="card"><div style="font-weight:900;font-size:18px;margin-bottom:6px">🏆 Tabla de posiciones</div></div>');
-  if(!data||!data.length){card.appendChild(el('<p class="muted">Aún no hay jugadores.</p>'));}
-  (data||[]).forEach((r,i)=>{
+  const rows=data||[];
+  const paid=rows.filter(r=>r.has_paid).length;
+  const prizePer=Math.max(0,Number(cfg.buy_in||0)-Number(cfg.fee||0));
+  const pot=prizePer*paid;
+  c.appendChild(el(`<div class="pot">
+    <div style="font-weight:800;font-size:12px;opacity:.9;letter-spacing:.6px">🏆 BOTE PARA EL GANADOR</div>
+    <div class="amt">${money(pot,cfg.currency)}</div>
+    <div style="font-size:12px;opacity:.92">${paid} pagado(s) × ${money(prizePer,cfg.currency)} c/u</div>
+  </div>`));
+  const card=el('<div class="card"><div style="font-weight:900;font-size:18px;margin-bottom:6px">Tabla de posiciones</div></div>');
+  if(!rows.length){card.appendChild(el('<p class="muted">Aún no hay jugadores.</p>'));}
+  rows.forEach((r,i)=>{
     const me=r.user_id===STATE.user.id;
     const g=i===0?'g1':i===1?'g2':i===2?'g3':'';
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
     card.appendChild(el(`<div class="lead-row" style="${me?'background:#f0fdf4;border-radius:10px':''}">
-      <div class="rank ${g}">${i+1}</div>
+      <div class="rank ${g}">${medal}</div>
       <div class="nm">${esc(r.display_name)}${me?' <span class="muted">(tú)</span>':''} ${r.has_paid?'<span class="pill paid">pagó</span>':'<span class="pill unpaid">debe</span>'}<div class="muted" style="font-size:11px;font-weight:600">${r.points} de ${r.graded} jugados · ${r.total_picks} picks</div></div>
       <div class="pts">${r.points}</div>
     </div>`));
@@ -371,11 +420,17 @@ function payRow(label,emoji,handle,link){
 }
 function viewBote(){
   const cfg=STATE.config||{};const p=STATE.profile||{};
+  const buy=Number(cfg.buy_in||0),fee=Number(cfg.fee||0),prize=Math.max(0,buy-fee);
   const c=el('<div></div>');
   c.appendChild(el(`<div class="card center">
-    <div class="muted" style="font-weight:800">INSCRIPCIÓN</div>
-    <div style="font-size:40px;font-weight:900;color:var(--green);margin:4px 0">${money(cfg.buy_in,cfg.currency)}</div>
+    <div class="muted" style="font-weight:800;letter-spacing:.5px">INSCRIPCIÓN</div>
+    <div style="font-size:44px;font-weight:900;color:var(--green);margin:2px 0;letter-spacing:-1.5px">${money(buy,cfg.currency)}</div>
     <div>${p.has_paid?'<span class="pill paid">✓ Ya pagaste</span>':'<span class="pill unpaid">Pendiente de pago</span>'}</div>
+    ${fee>0?`<div class="breakdown">
+      <div class="brk prize"><span>🏆 Va al premio</span><span class="v">${money(prize,cfg.currency)}</span></div>
+      <div class="brk fee"><span>🛠️ Comisión del organizador</span><span class="v">${money(fee,cfg.currency)}</span></div>
+    </div>
+    <p class="muted" style="font-size:12px;margin-top:10px">De cada inscripción, ${money(prize,cfg.currency)} va al bote del ganador y ${money(fee,cfg.currency)} es la comisión por organizar y administrar.</p>`:''}
     ${cfg.pot_note?`<p class="muted" style="margin-top:10px">${esc(cfg.pot_note)}</p>`:''}
   </div>`));
   const pays=el('<div class="card"><div style="font-weight:900;font-size:16px">Paga al organizador</div><p class="muted" style="font-size:12.5px;margin:6px 0 0">Manda tu inscripción por cualquiera de estas vías. Escanea el QR o copia el dato. El organizador marca tu pago en la app.</p></div>');
@@ -404,7 +459,9 @@ async function viewAdmin(){
     <div style="font-weight:900;font-size:16px">⚙️ Configuración del bote</div>
     <label>Nombre de la quiniela</label><input id="c-name" value="${esc(cfg.season_name||'')}"/>
     <div class="row"><div><label>Inscripción</label><input id="c-buy" type="number" step="1" value="${esc(cfg.buy_in||0)}"/></div>
+    <div><label>Comisión (tu fee)</label><input id="c-fee" type="number" step="1" value="${esc(cfg.fee||0)}"/></div>
     <div><label>Moneda</label><input id="c-cur" value="${esc(cfg.currency||'USD')}"/></div></div>
+    <p class="muted" style="font-size:12px;margin-top:6px">Al premio por jugador: <b id="c-prize">—</b> (inscripción − comisión).</p>
     <label>Zelle (correo o teléfono)</label><input id="c-zelle" value="${esc(cfg.zelle_handle||'')}"/>
     <label>Cash App ($cashtag)</label><input id="c-cash" value="${esc(cfg.cashapp_handle||'')}"/>
     <label>Venmo (usuario)</label><input id="c-venmo" value="${esc(cfg.venmo_handle||'')}"/>
@@ -412,11 +469,14 @@ async function viewAdmin(){
     <button id="c-save" class="btn" style="width:100%;margin-top:14px">Guardar configuración</button>
   </div>`);
   cf.querySelector('#c-save').onclick=async()=>{
-    const upd={season_name:val('c-name'),buy_in:Number(val('c-buy')||0),currency:val('c-cur')||'USD',
+    const upd={season_name:val('c-name'),buy_in:Number(val('c-buy')||0),fee:Number(val('c-fee')||0),currency:val('c-cur')||'USD',
       zelle_handle:val('c-zelle')||null,cashapp_handle:val('c-cash')||null,venmo_handle:val('c-venmo')||null,pot_note:val('c-note')||null};
     const {error}=await sb.from('app_config').update(upd).eq('id',1);
     if(error)toast('Error: '+error.message);else{STATE.config={...cfg,...upd};toast('Configuración guardada');}
   };
+  const updPrize=()=>{const e=document.getElementById('c-prize');if(e)e.textContent=money(Math.max(0,Number(val('c-buy')||0)-Number(val('c-fee')||0)),val('c-cur')||'USD');};
+  ['c-buy','c-fee','c-cur'].forEach(id=>{const ie=cf.querySelector('#'+id);if(ie)ie.addEventListener('input',updPrize);});
+  setTimeout(updPrize,0);
   c.appendChild(cf);
 
   // ADD MATCH
@@ -462,7 +522,7 @@ async function viewAdmin(){
     const tag=m.admin_locked?' · 🔒 fijado':(m.external_source?' · auto':'');
     const r=el(`<div class="match">
       <div class="meta"><span class="pill round">${esc(m.round||'')}</span><span>${esc(fmtDate(m.kickoff))}${tag}</span></div>
-      <div style="font-weight:800;text-align:center;margin-bottom:8px">${esc(m.team1)} vs ${esc(m.team2)}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;font-weight:800;margin-bottom:8px;flex-wrap:wrap">${flag(m.team1_logo)}${esc(m.team1)} <span class="muted">vs</span> ${flag(m.team2_logo)}${esc(m.team2)}</div>
       <div class="row">
         <button class="btn sm ${m.result===1?'':'alt'}" data-r="1">Gana ${esc(m.team1)}</button>
         <button class="btn sm ${m.result===2?'':'alt'}" data-r="2">Gana ${esc(m.team2)}</button>
