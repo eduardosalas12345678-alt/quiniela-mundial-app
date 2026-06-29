@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Quiniela Mundial 2026</title>
+<style>
+  :root{
+    --bg:#0b132b; --bg2:#1c2541; --card:#ffffff; --ink:#11182a; --muted:#6b7280;
+    --green:#16a34a; --green-d:#15803d; --gold:#f5b301; --red:#dc2626; --line:#e5e7eb;
+    --accent:#3a86ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(160deg,#0b132b,#1c2541 60%,#13203f);
+    color:var(--ink); min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:680px;margin:0 auto;padding:0 14px 110px}
+  header.top{
+    position:sticky;top:0;z-index:20;
+    background:rgba(11,19,43,.92);backdrop-filter:blur(8px);
+    color:#fff;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.08)
+  }
+  header.top h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.2px;display:flex;gap:8px;align-items:center}
+  header.top .who{font-size:12px;color:#cbd5e1;display:flex;gap:10px;align-items:center}
+  .btn{cursor:pointer;border:0;border-radius:12px;padding:11px 14px;font-size:15px;font-weight:700;background:var(--green);color:#fff;transition:.15s}
+  .btn:active{transform:scale(.98)}
+  .btn.alt{background:#eef2f7;color:#11182a}
+  .btn.gold{background:var(--gold);color:#3a2b00}
+  .btn.ghost{background:transparent;color:#cbd5e1;border:1px solid rgba(255,255,255,.25);padding:6px 10px;font-size:12px;border-radius:10px}
+  .btn.sm{padding:8px 10px;font-size:13px;border-radius:10px}
+  .btn.danger{background:var(--red)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .card{background:var(--card);border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+  .muted{color:var(--muted)}
+  .center{text-align:center}
+  input,select,textarea{
+    width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:#fff;color:var(--ink);margin-top:6px
+  }
+  label{font-size:13px;font-weight:700;color:#374151;display:block;margin-top:12px}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  .pill{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:800}
+  .pill.paid{background:#dcfce7;color:#166534}.pill.unpaid{background:#fee2e2;color:#991b1b}
+  .pill.win{background:#dcfce7;color:#166534}.pill.lose{background:#fee2e2;color:#991b1b}
+  .pill.round{background:#e0e7ff;color:#3730a3}
+  /* nav */
+  nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom))}
+  nav.tabs button{background:none;border:0;font-size:11px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;cursor:pointer;flex:1;padding:4px}
+  nav.tabs button .ic{font-size:20px}
+  nav.tabs button.on{color:var(--green)}
+  /* match card */
+  .match{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0}
+  .match .meta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);margin-bottom:10px}
+  .teams{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:stretch}
+  .team{border:2px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center;cursor:pointer;font-weight:800;font-size:15px;background:#fff;transition:.12s;display:flex;flex-direction:column;gap:4px;align-items:center;justify-content:center}
+  .team small{font-weight:700;color:var(--muted);font-size:11px}
+  .team.sel{border-color:var(--green);background:#f0fdf4;box-shadow:0 0 0 2px #16a34a33 inset}
+  .team.win{border-color:var(--gold);background:#fffbeb}
+  .team.locked{cursor:default;opacity:.95}
+  .vs{display:flex;align-items:center;justify-content:center;font-weight:800;color:#9ca3af;font-size:12px}
+  .lead-row{display:flex;align-items:center;gap:12px;padding:12px 6px;border-bottom:1px solid var(--line)}
+  .lead-row:last-child{border-bottom:0}
+  .rank{width:30px;height:30px;border-radius:50%;background:#eef2f7;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0}
+  .rank.g1{background:var(--gold);color:#3a2b00}.rank.g2{background:#d1d5db}.rank.g3{background:#e8b07a;color:#5a2e00}
+  .lead-row .nm{flex:1;font-weight:700}
+  .lead-row .pts{font-weight:900;font-size:18px;color:var(--green)}
+  .seg{display:flex;background:#eef2f7;border-radius:12px;padding:4px;margin:10px 0}
+  .seg button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-weight:800;color:var(--muted);cursor:pointer;font-size:13px}
+  .seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .pay{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:14px;margin:10px 0}
+  .pay .qr{width:96px;height:96px;flex-shrink:0;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center}
+  .pay .info{flex:1;min-width:0}
+  .pay .handle{font-weight:800;font-size:16px;word-break:break-all}
+  .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:60;opacity:0;transition:.25s;pointer-events:none}
+  .toast.show{opacity:1}
+  .hint{font-size:12.5px;color:var(--muted);background:#f8fafc;border:1px dashed var(--line);border-radius:12px;padding:10px 12px;margin:10px 0;line-height:1.45}
+  .brand{color:#fff;text-align:center;padding:34px 0 10px}
+  .brand .logo{font-size:46px}
+  .brand h2{margin:8px 0 2px;font-size:24px;font-weight:900}
+  .brand p{margin:0;color:#aab4cf;font-size:14px}
+  .switch{display:flex;align-items:center;gap:8px;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line)}
+  .switch:last-child{border-bottom:0}
+  .togg{width:46px;height:28px;border-radius:999px;background:#cbd5e1;position:relative;cursor:pointer;transition:.15s;flex-shrink:0}
+  .togg.on{background:var(--green)}
+  .togg b{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s}
+  .togg.on b{left:21px}
+  a.link{color:var(--accent);text-decoration:none;font-weight:700}
+  .err{background:#fef2f2;color:#991b1b;border:1px solid #fecaca;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+  .ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;border-radius:10px;padding:10px;font-size:13px;margin-top:10px}
+  h3.sec{color:#fff;margin:18px 4px 4px;font-size:15px;font-weight:800}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="toast" class="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" async></script>
+<script>
+const SUPABASE_URL = "https://fmyhghlzeaswtzsypykc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ngGmLQKFxUVRhoRFQTk1IQ_MUyRBNed";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const ROUNDS = ["Dieciseisavos (R32)","Octavos","Cuartos","Semifinal","Tercer lugar","Final"];
+const app = document.getElementById('app');
+let STATE = { user:null, profile:null, config:null, tab:'partidos', authMode:'login' };
+
+// ---------- helpers ----------
+const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1900);}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmtDate(iso){try{return new Date(iso).toLocaleString('es-MX',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return iso;}}
+function money(n,cur){const v=Number(n||0);return v.toLocaleString('en-US',{style:'currency',currency:(cur||'USD')});}
+function copy(txt){navigator.clipboard.writeText(txt).then(()=>toast('Copiado: '+txt)).catch(()=>toast('No se pudo copiar'));}
+function phoneDigits(p){return (p||'').replace(/\D/g,'');}
+function phoneToEmail(p){return 'q_'+phoneDigits(p)+'@quiniela.app';}
+async function sha256hex(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+function normCode(c){return (c||'').toUpperCase().replace(/[^A-Z0-9]/g,'');}
+function genRecoveryCode(){const a='ABCDEFGHJKMNPQRSTUVWXYZ23456789';let s='';const r=crypto.getRandomValues(new Uint8Array(8));for(let i=0;i<8;i++)s+=a[r[i]%a.length];return s;}
+const LOCK_MS=3600*1000; // los picks cierran 1h antes
+
+// ---------- AUTH ----------
+function renderAuth(){
+  const m = STATE.authMode;
+  app.innerHTML='';
+  app.appendChild(el(`<div class="wrap">
+    <div class="brand"><div class="logo">⚽🏆</div><h2>Quiniela Mundial 2026</h2><p>Predice los ganadores. Suma puntos. Presume.</p></div>
+    <div class="card">
+      <div class="seg">
+        <button id="t-login" class="${m==='login'?'on':''}">Entrar</button>
+        <button id="t-signup" class="${m==='signup'?'on':''}">Crear cuenta</button>
+      </div>
+      <div id="nm-wrap" style="display:${m==='signup'?'block':'none'}">
+        <label>Tu nombre (como aparece en la tabla)</label>
+        <input id="f-name" placeholder="Ej. Lalo" autocomplete="name"/>
+      </div>
+      <label>Teléfono</label>
+      <input id="f-phone" type="tel" inputmode="numeric" placeholder="10 dígitos" autocomplete="tel"/>
+      <label>Contraseña</label>
+      <input id="f-pass" type="password" placeholder="mínimo 6 caracteres" autocomplete="${m==='signup'?'new-password':'current-password'}"/>
+      <div id="auth-msg"></div>
+      <button id="f-go" class="btn" style="width:100%;margin-top:16px">${m==='signup'?'Crear mi cuenta':'Entrar'}</button>
+      ${m==='login'?'<p class="center" style="margin-top:12px"><a class="link" id="f-forgot" style="cursor:pointer">¿Olvidaste tu contraseña?</a></p>':''}
+      <p class="muted center" style="font-size:12px;margin-top:14px">El dinero del bote NO pasa por esta app. Solo se llevan predicciones y puntos.</p>
+    </div>
+  </div>`));
+  document.getElementById('t-login').onclick=()=>{STATE.authMode='login';renderAuth();};
+  document.getElementById('t-signup').onclick=()=>{STATE.authMode='signup';renderAuth();};
+  document.getElementById('f-go').onclick=doAuth;
+  const fg=document.getElementById('f-forgot'); if(fg) fg.onclick=()=>renderRecover();
+  app.querySelectorAll('input').forEach(i=>i.addEventListener('keydown',e=>{if(e.key==='Enter')doAuth();}));
+}
+async function doAuth(){
+  const phone=val('f-phone');
+  const pass=document.getElementById('f-pass').value;
+  const msg=document.getElementById('auth-msg');
+  msg.innerHTML='';
+  const digits=phoneDigits(phone);
+  if(digits.length<10||!pass){msg.innerHTML='<div class="err">Pon tu teléfono (10 dígitos) y contraseña.</div>';return;}
+  const email=phoneToEmail(phone);
+  const btn=document.getElementById('f-go');btn.disabled=true;btn.textContent='Un momento...';
+  try{
+    if(STATE.authMode==='signup'){
+      const name=val('f-name')||('Jugador '+digits.slice(-4));
+      const {data,error}=await sb.auth.signUp({email,password:pass,options:{data:{display_name:name,phone:digits}}});
+      if(error)throw error;
+      if(!data.session){
+        msg.innerHTML='<div class="ok">Cuenta creada. Si te pide confirmar, pídele al organizador que desactive la confirmación de correo. Luego entra.</div>';
+        btn.disabled=false;btn.textContent='Entrar';STATE.authMode='login';return;
+      }
+      // generar y guardar el código de recuperación (su hash sha256), luego mostrarlo
+      const code=genRecoveryCode();
+      try{await sb.from('profiles').update({recovery_hash:await sha256hex(code)}).eq('id',data.user.id);}catch(e){}
+      renderRecoveryCode(code);
+      return;
+    } else {
+      const {error}=await sb.auth.signInWithPassword({email,password:pass});
+      if(error)throw error;
+    }
+    await boot();
+  }catch(e){
+    const m=String(e.message||'Error al entrar');
+    const friendly=/Invalid login credentials/i.test(m)?'Teléfono o contraseña incorrectos.':(/Email not confirmed/i.test(m)?'Falta desactivar la confirmación de correo en Supabase (lo hace el organizador).':m);
+    msg.innerHTML='<div class="err">'+esc(friendly)+'</div>';
+    btn.disabled=false;btn.textContent=STATE.authMode==='signup'?'Crear mi cuenta':'Entrar';
+  }
+}
+
+// ---------- RECUPERACIÓN DE CUENTA ----------
+function renderRecover(){
+  app.innerHTML='';
+  app.appendChild(el(`<div class="wrap">
+    <div class="brand"><div class="logo">🔑</div><h2>Recuperar cuenta</h2><p>Con tu teléfono y tu código de recuperación.</p></div>
+    <div class="card">
+      <label>Teléfono</label>
+      <input id="r-phone" type="tel" inputmode="numeric" placeholder="10 dígitos" autocomplete="tel"/>
+      <label>Código de recuperación (8 caracteres)</label>
+      <input id="r-code" placeholder="Ej. K7P2M9QX" autocomplete="one-time-code" style="text-transform:uppercase;letter-spacing:2px"/>
+      <label>Nueva contraseña</label>
+      <input id="r-pass" type="password" placeholder="mínimo 6 caracteres" autocomplete="new-password"/>
+      <div id="rec-msg"></div>
+      <button id="r-go" class="btn" style="width:100%;margin-top:16px">Cambiar contraseña</button>
+      <p class="center" style="margin-top:12px"><a class="link" id="r-back" style="cursor:pointer">← Volver a entrar</a></p>
+    </div>
+  </div>`));
+  document.getElementById('r-back').onclick=()=>{STATE.authMode='login';renderAuth();};
+  document.getElementById('r-go').onclick=async()=>{
+    const phone=val('r-phone'),code=val('r-code'),pass=document.getElementById('r-pass').value;
+    const msg=document.getElementById('rec-msg');msg.innerHTML='';
+    if(!phone||!code||pass.length<6){msg.innerHTML='<div class="err">Completa teléfono, código y una contraseña de mínimo 6 caracteres.</div>';return;}
+    const btn=document.getElementById('r-go');btn.disabled=true;btn.textContent='Un momento...';
+    try{
+      const {data,error}=await sb.functions.invoke('recover',{body:{phone:phoneDigits(phone),code:normCode(code),new_password:pass}});
+      if(error)throw error;
+      if(data&&data.error)throw new Error(data.error);
+      msg.innerHTML='<div class="ok">Listo. Ya puedes entrar con tu nueva contraseña.</div>';
+      btn.textContent='Cambiar contraseña';
+      setTimeout(()=>{STATE.authMode='login';renderAuth();},1600);
+    }catch(e){
+      msg.innerHTML='<div class="err">'+esc(e.message||'No se pudo recuperar la cuenta')+'</div>';
+      btn.disabled=false;btn.textContent='Cambiar contraseña';
+    }
+  };
+}
+function renderRecoveryCode(code){
+  app.innerHTML='';
+  app.appendChild(el(`<div class="wrap">
+    <div class="brand"><div class="logo">🔐</div><h2>Tu código de recuperación</h2><p>Guárdalo. Es la única forma de recuperar tu cuenta si olvidas la contraseña.</p></div>
+    <div class="card center">
+      <div style="font-size:30px;font-weight:900;letter-spacing:5px;background:#f8fafc;border:2px dashed var(--line);border-radius:14px;padding:18px;margin:4px 0">${esc(code)}</div>
+      <button id="rc-copy" class="btn alt" style="width:100%;margin-top:10px">Copiar código</button>
+      <div class="hint" style="text-align:left">No usamos SMS. Si olvidas tu contraseña la recuperas con tu <b>teléfono + este código</b>. Tómale captura ahora.</div>
+      <button id="rc-go" class="btn" style="width:100%">Ya lo guardé, continuar</button>
+    </div>
+  </div>`));
+  document.getElementById('rc-copy').onclick=()=>copy(code);
+  document.getElementById('rc-go').onclick=()=>boot();
+}
+
+// ---------- SHELL ----------
+function shell(content){
+  const p=STATE.profile||{};
+  app.innerHTML='';
+  app.appendChild(el(`<header class="top">
+    <h1>⚽ Quiniela 2026</h1>
+    <div class="who"><span>${esc(p.display_name||'')}${p.is_admin?' · admin':''}</span>
+    <button id="logout" class="btn ghost">Salir</button></div>
+  </header>`));
+  const w=el('<div class="wrap"></div>');w.appendChild(content);app.appendChild(w);
+  const t=STATE.tab;
+  const nav=el(`<nav class="tabs">
+    <button data-t="partidos" class="${t==='partidos'?'on':''}"><span class="ic">📝</span>Partidos</button>
+    <button data-t="tabla" class="${t==='tabla'?'on':''}"><span class="ic">🏆</span>Tabla</button>
+    <button data-t="bote" class="${t==='bote'?'on':''}"><span class="ic">💵</span>Bote</button>
+    ${p.is_admin?`<button data-t="admin" class="${t==='admin'?'on':''}"><span class="ic">⚙️</span>Admin</button>`:''}
+  </nav>`);
+  nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{STATE.tab=b.dataset.t;route();});
+  app.appendChild(nav);
+  document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
+}
+function loading(){const c=el('<div></div>');c.appendChild(el('<div class="card center muted">Cargando...</div>'));shell(c);}
+
+function route(){
+  if(STATE.tab==='partidos')viewPartidos();
+  else if(STATE.tab==='tabla')viewTabla();
+  else if(STATE.tab==='bote')viewBote();
+  else if(STATE.tab==='admin')viewAdmin();
+}
+
+// ---------- PARTIDOS / PICKS ----------
+async function viewPartidos(){
+  loading();
+  const [{data:matches,error:me},{data:preds}] = await Promise.all([
+    sb.from('matches').select('*').order('kickoff',{ascending:true}).order('sort_order',{ascending:true}),
+    sb.from('predictions').select('match_id,pick').eq('user_id',STATE.user.id)
+  ]);
+  const pmap={};(preds||[]).forEach(p=>pmap[p.match_id]=p.pick);
+  const c=el('<div></div>');
+  c.appendChild(el(`<div class="hint">Elige quién <b>gana/avanza</b> en cada partido. <b>1 punto</b> por acierto. Tu pick se <b>bloquea 1 hora antes</b> del partido. En knockout cuenta quién pasa (incluye penales).</div>`));
+  if(me){c.appendChild(el('<div class="card err">No se pudieron cargar los partidos.</div>'));shell(c);return;}
+  if(!matches||!matches.length){
+    c.appendChild(el(`<div class="card center"><div style="font-size:34px">🗓️</div><p class="muted">Aún no hay partidos cargados.${STATE.profile.is_admin?' Ve a <b>Admin</b> para agregarlos.':' El organizador los agregará pronto.'}</p></div>`));
+    shell(c);return;
+  }
+  // group by round preserving order
+  const groups=[];const idx={};
+  matches.forEach(m=>{const r=m.round||'Eliminatoria';if(!(r in idx)){idx[r]=groups.length;groups.push({round:r,items:[]});}groups[idx[r]].items.push(m);});
+  groups.forEach(g=>{
+    const sec=el(`<div class="card"><div style="font-weight:900;font-size:16px;margin-bottom:4px">${esc(g.round)}</div></div>`);
+    g.items.forEach(m=>{
+      const now=new Date();const lockAt=new Date(new Date(m.kickoff).getTime()-LOCK_MS);const locked=now>=lockAt;
+      const myPick=pmap[m.id];
+      const t1cls='team'+(m.result===1?' win':'')+(myPick===1?' sel':'')+(locked?' locked':'');
+      const t2cls='team'+(m.result===2?' win':'')+(myPick===2?' sel':'')+(locked?' locked':'');
+      let status='';
+      if(locked){
+        if(m.result){status = myPick? (myPick===m.result?'<span class="pill win">✓ Acertaste</span>':'<span class="pill lose">✗ Fallaste</span>') : '<span class="muted" style="font-size:11px">sin pick</span>';}
+        else{status='<span class="muted" style="font-size:11px">🔒 En juego</span>';}
+      } else {
+        status = myPick? '<span class="pill paid">Pick guardado</span>' : '<span class="muted" style="font-size:11px">elige uno</span>';
+      }
+      const card=el(`<div class="match">
+        <div class="meta"><span class="pill round">${esc(m.round||'')}</span><span>${esc(fmtDate(m.kickoff))}${m.venue?' · '+esc(m.venue):''}</span></div>
+        <div class="teams">
+          <div class="${t1cls}" data-pick="1">${esc(m.team1)}${m.team1_code?'<small>'+esc(m.team1_code)+'</small>':''}</div>
+          <div class="vs">VS</div>
+          <div class="${t2cls}" data-pick="2">${esc(m.team2)}${m.team2_code?'<small>'+esc(m.team2_code)+'</small>':''}</div>
+        </div>
+        <div class="center" style="margin-top:8px">${status}</div>
+      </div>`);
+      if(!locked){
+        card.querySelectorAll('[data-pick]').forEach(tb=>{
+          tb.onclick=async()=>{
+            const pick=Number(tb.dataset.pick);
+            card.querySelectorAll('[data-pick]').forEach(x=>x.classList.remove('sel'));
+            tb.classList.add('sel');
+            const {error}=await sb.from('predictions').upsert({user_id:STATE.user.id,match_id:m.id,pick},{onConflict:'user_id,match_id'});
+            if(error){toast('Error al guardar');tb.classList.remove('sel');}
+            else{pmap[m.id]=pick;toast('¡Pick guardado!');card.querySelector('.center').innerHTML='<span class="pill paid">Pick guardado</span>';}
+          };
+        });
+      }
+      sec.appendChild(card);
+    });
+    c.appendChild(sec);
+  });
+  shell(c);
+}
+
+// ---------- TABLA ----------
+async function viewTabla(){
+  loading();
+  const {data,error}=await sb.rpc('get_leaderboard');
+  const c=el('<div></div>');
+  if(error){c.appendChild(el('<div class="card err">No se pudo cargar la tabla.</div>'));shell(c);return;}
+  const card=el('<div class="card"><div style="font-weight:900;font-size:18px;margin-bottom:6px">🏆 Tabla de posiciones</div></div>');
+  if(!data||!data.length){card.appendChild(el('<p class="muted">Aún no hay jugadores.</p>'));}
+  (data||[]).forEach((r,i)=>{
+    const me=r.user_id===STATE.user.id;
+    const g=i===0?'g1':i===1?'g2':i===2?'g3':'';
+    card.appendChild(el(`<div class="lead-row" style="${me?'background:#f0fdf4;border-radius:10px':''}">
+      <div class="rank ${g}">${i+1}</div>
+      <div class="nm">${esc(r.display_name)}${me?' <span class="muted">(tú)</span>':''} ${r.has_paid?'<span class="pill paid">pagó</span>':'<span class="pill unpaid">debe</span>'}<div class="muted" style="font-size:11px;font-weight:600">${r.points} de ${r.graded} jugados · ${r.total_picks} picks</div></div>
+      <div class="pts">${r.points}</div>
+    </div>`));
+  });
+  c.appendChild(card);
+  shell(c);
+}
+
+// ---------- BOTE / PAGO ----------
+function payRow(label,emoji,handle,link){
+  if(!handle)return null;
+  const row=el(`<div class="pay">
+    <div class="qr" id="qr-${label}"></div>
+    <div class="info">
+      <div class="muted" style="font-weight:800;font-size:12px">${emoji} ${label}</div>
+      <div class="handle">${esc(handle)}</div>
+      <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn alt sm" data-copy="${esc(handle)}">Copiar</button>
+        ${link?`<a class="btn gold sm" style="text-decoration:none" href="${esc(link)}" target="_blank" rel="noopener">Abrir</a>`:''}
+      </div>
+    </div>
+  </div>`);
+  row.querySelector('[data-copy]').onclick=()=>copy(handle);
+  setTimeout(()=>{try{const box=row.querySelector('#qr-'+label);if(window.QRCode){new QRCode(box,{text:link||handle,width:96,height:96,correctLevel:QRCode.CorrectLevel.M});}else{box.innerHTML='<span class="muted" style="font-size:10px">—</span>';}}catch(e){}},60);
+  return row;
+}
+function viewBote(){
+  const cfg=STATE.config||{};const p=STATE.profile||{};
+  const c=el('<div></div>');
+  c.appendChild(el(`<div class="card center">
+    <div class="muted" style="font-weight:800">INSCRIPCIÓN</div>
+    <div style="font-size:40px;font-weight:900;color:var(--green);margin:4px 0">${money(cfg.buy_in,cfg.currency)}</div>
+    <div>${p.has_paid?'<span class="pill paid">✓ Ya pagaste</span>':'<span class="pill unpaid">Pendiente de pago</span>'}</div>
+    ${cfg.pot_note?`<p class="muted" style="margin-top:10px">${esc(cfg.pot_note)}</p>`:''}
+  </div>`));
+  const pays=el('<div class="card"><div style="font-weight:900;font-size:16px">Paga al organizador</div><p class="muted" style="font-size:12.5px;margin:6px 0 0">Manda tu inscripción por cualquiera de estas vías. Escanea el QR o copia el dato. El organizador marca tu pago en la app.</p></div>');
+  const z=payRow('Zelle','💳',cfg.zelle_handle,null);
+  const ca=payRow('Cash App','🟢',cfg.cashapp_handle,cfg.cashapp_handle?('https://cash.app/'+(String(cfg.cashapp_handle).startsWith('$')?'':'$')+String(cfg.cashapp_handle).replace(/^\$/,'')):null);
+  const ve=payRow('Venmo','🔵',cfg.venmo_handle,cfg.venmo_handle?('https://venmo.com/u/'+String(cfg.venmo_handle).replace(/^@/,'')):null);
+  [z,ca,ve].forEach(r=>{if(r)pays.appendChild(r);});
+  if(!z&&!ca&&!ve)pays.appendChild(el('<p class="muted">El organizador aún no configura los datos de pago.</p>'));
+  c.appendChild(pays);
+  c.appendChild(el('<div class="hint">⚠️ El dinero del bote no pasa por la app: son transferencias personales directas al organizador, y él reparte el premio al ganador al final.</div>'));
+  shell(c);
+}
+
+// ---------- ADMIN ----------
+async function viewAdmin(){
+  loading();
+  const cfg=STATE.config||{};
+  const [{data:matches},{data:players}]=await Promise.all([
+    sb.from('matches').select('*').order('kickoff',{ascending:true}),
+    sb.from('profiles').select('*').order('display_name',{ascending:true})
+  ]);
+  const c=el('<div></div>');
+
+  // CONFIG
+  const cf=el(`<div class="card">
+    <div style="font-weight:900;font-size:16px">⚙️ Configuración del bote</div>
+    <label>Nombre de la quiniela</label><input id="c-name" value="${esc(cfg.season_name||'')}"/>
+    <div class="row"><div><label>Inscripción</label><input id="c-buy" type="number" step="1" value="${esc(cfg.buy_in||0)}"/></div>
+    <div><label>Moneda</label><input id="c-cur" value="${esc(cfg.currency||'USD')}"/></div></div>
+    <label>Zelle (correo o teléfono)</label><input id="c-zelle" value="${esc(cfg.zelle_handle||'')}"/>
+    <label>Cash App ($cashtag)</label><input id="c-cash" value="${esc(cfg.cashapp_handle||'')}"/>
+    <label>Venmo (usuario)</label><input id="c-venmo" value="${esc(cfg.venmo_handle||'')}"/>
+    <label>Nota del bote</label><textarea id="c-note" rows="2">${esc(cfg.pot_note||'')}</textarea>
+    <button id="c-save" class="btn" style="width:100%;margin-top:14px">Guardar configuración</button>
+  </div>`);
+  cf.querySelector('#c-save').onclick=async()=>{
+    const upd={season_name:val('c-name'),buy_in:Number(val('c-buy')||0),currency:val('c-cur')||'USD',
+      zelle_handle:val('c-zelle')||null,cashapp_handle:val('c-cash')||null,venmo_handle:val('c-venmo')||null,pot_note:val('c-note')||null};
+    const {error}=await sb.from('app_config').update(upd).eq('id',1);
+    if(error)toast('Error: '+error.message);else{STATE.config={...cfg,...upd};toast('Configuración guardada');}
+  };
+  c.appendChild(cf);
+
+  // ADD MATCH
+  const am=el(`<div class="card">
+    <div style="font-weight:900;font-size:16px">➕ Agregar partido (manual)</div>
+    <p class="muted" style="font-size:12px;margin:4px 0 0">Normalmente no hace falta: el Mundial se carga solo. Úsalo solo para un partido extra o de prueba.</p>
+    <label>Ronda</label>
+    <select id="m-round">${ROUNDS.map(r=>`<option>${r}</option>`).join('')}</select>
+    <div class="row"><div><label>Equipo 1</label><input id="m-t1" placeholder="Ej. México"/></div>
+    <div><label>Equipo 2</label><input id="m-t2" placeholder="Ej. Argentina"/></div></div>
+    <label>Fecha y hora (tu hora local)</label><input id="m-ko" type="datetime-local"/>
+    <label>Sede (opcional)</label><input id="m-ven" placeholder="Ej. Estadio Azteca"/>
+    <button id="m-add" class="btn" style="width:100%;margin-top:14px">Agregar partido</button>
+  </div>`);
+  am.querySelector('#m-add').onclick=async()=>{
+    const t1=val('m-t1'),t2=val('m-t2'),ko=val('m-ko');
+    if(!t1||!t2||!ko){toast('Faltan equipos o fecha');return;}
+    const {error}=await sb.from('matches').insert({round:val('m-round'),team1:t1,team2:t2,venue:val('m-ven')||null,kickoff:new Date(ko).toISOString()});
+    if(error)toast('Error: '+error.message);else{toast('Partido agregado');viewAdmin();}
+  };
+  c.appendChild(am);
+
+  // MATCHES LIST
+  const ml=el(`<div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="font-weight:900;font-size:16px">📋 Partidos y resultados</div>
+      <button id="m-sync" class="btn sm gold">🔄 Sincronizar</button>
+    </div>
+    <p class="muted" style="font-size:12px;margin:0 0 4px">El bracket del Mundial se carga y actualiza solo desde ESPN cada pocos minutos. Si fijas un resultado a mano queda <b>🔒 fijado</b> y el automático ya no lo toca; <b>Limpiar</b> lo devuelve al automático.</p>
+  </div>`);
+  ml.querySelector('#m-sync').onclick=async(e)=>{
+    const b=e.currentTarget;b.disabled=true;b.textContent='Sincronizando…';
+    try{
+      const {data,error}=await sb.functions.invoke('sync',{body:{}});
+      if(error)throw error;
+      if(data&&data.error)throw new Error(data.error);
+      toast('Sincronizado: '+(data&&data.synced!=null?data.synced:0)+' partidos');
+    }catch(err){toast('Error al sincronizar');}
+    viewAdmin();
+  };
+  if(!matches||!matches.length)ml.appendChild(el('<p class="muted">Aún no hay partidos. Toca <b>Sincronizar</b> para cargar el bracket del Mundial.</p>'));
+  (matches||[]).forEach(m=>{
+    const tag=m.admin_locked?' · 🔒 fijado':(m.external_source?' · auto':'');
+    const r=el(`<div class="match">
+      <div class="meta"><span class="pill round">${esc(m.round||'')}</span><span>${esc(fmtDate(m.kickoff))}${tag}</span></div>
+      <div style="font-weight:800;text-align:center;margin-bottom:8px">${esc(m.team1)} vs ${esc(m.team2)}</div>
+      <div class="row">
+        <button class="btn sm ${m.result===1?'':'alt'}" data-r="1">Gana ${esc(m.team1)}</button>
+        <button class="btn sm ${m.result===2?'':'alt'}" data-r="2">Gana ${esc(m.team2)}</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn sm ghost" style="color:#374151;border-color:var(--line)" data-r="0">Limpiar</button>
+        <button class="btn sm danger" data-del="1">Borrar</button>
+      </div>
+    </div>`);
+    r.querySelectorAll('[data-r]').forEach(b=>b.onclick=async()=>{
+      const v=Number(b.dataset.r);
+      const upd=v===0?{result:null,admin_locked:false}:{result:v,admin_locked:true};
+      const {error}=await sb.from('matches').update(upd).eq('id',m.id);
+      if(error)toast('Error: '+error.message);else{toast(v===0?'Devuelto al automático':'Resultado fijado');viewAdmin();}
+    });
+    r.querySelector('[data-del]').onclick=async()=>{
+      if(!confirm('¿Borrar este partido y sus picks?'))return;
+      const {error}=await sb.from('matches').delete().eq('id',m.id);
+      if(error)toast('Error: '+error.message);else{toast('Partido borrado');viewAdmin();}
+    };
+    ml.appendChild(r);
+  });
+  c.appendChild(ml);
+
+  // PLAYERS
+  const pl=el('<div class="card"><div style="font-weight:900;font-size:16px;margin-bottom:6px">👥 Jugadores y pagos</div></div>');
+  (players||[]).forEach(pr=>{
+    const row=el(`<div class="switch">
+      <div><b>${esc(pr.display_name)}</b>${pr.is_admin?' <span class="pill round">admin</span>':''}</div>
+      <div style="display:flex;gap:14px;align-items:center">
+        <div style="text-align:center"><div class="muted" style="font-size:10px">pagó</div><div class="togg ${pr.has_paid?'on':''}" data-paid><b></b></div></div>
+        <div style="text-align:center"><div class="muted" style="font-size:10px">admin</div><div class="togg ${pr.is_admin?'on':''}" data-adm><b></b></div></div>
+      </div>
+    </div>`);
+    row.querySelector('[data-paid]').onclick=async(e)=>{
+      const t=e.currentTarget;const nv=!t.classList.contains('on');
+      const {error}=await sb.from('profiles').update({has_paid:nv}).eq('id',pr.id);
+      if(error)toast('Error: '+error.message);else{t.classList.toggle('on');pr.has_paid=nv;toast('Actualizado');}
+    };
+    row.querySelector('[data-adm]').onclick=async(e)=>{
+      const t=e.currentTarget;const nv=!t.classList.contains('on');
+      const {error}=await sb.from('profiles').update({is_admin:nv}).eq('id',pr.id);
+      if(error)toast('Error: '+error.message);else{t.classList.toggle('on');pr.is_admin=nv;toast('Actualizado');}
+    };
+    pl.appendChild(row);
+  });
+  c.appendChild(pl);
+  shell(c);
+}
+function val(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+
+// ---------- BOOT ----------
+async function boot(){
+  const {data:{user}}=await sb.auth.getUser();
+  if(!user){renderAuth();return;}
+  STATE.user=user;
+  let {data:prof}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+  if(!prof){
+    await sb.from('profiles').insert({id:user.id,display_name:(user.user_metadata&&user.user_metadata.display_name)||user.email.split('@')[0]});
+    ({data:prof}=await sb.from('profiles').select('*').eq('id',user.id).maybeSingle());
+  }
+  STATE.profile=prof;
+  const {data:cfg}=await sb.from('app_config').select('*').eq('id',1).maybeSingle();
+  STATE.config=cfg||{};
+  STATE.tab='partidos';
+  route();
+}
+sb.auth.onAuthStateChange((ev)=>{ if(ev==='SIGNED_OUT'){renderAuth();} });
+boot();
+</script>
+</body>
+</html>
