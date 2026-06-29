@@ -570,7 +570,17 @@ async function viewAdmin(){
   c.appendChild(ml);
 
   // PLAYERS
-  const pl=el('<div class="card"><div style="font-weight:900;font-size:16px;margin-bottom:6px">👥 Jugadores y pagos</div></div>');
+  const buy=Number(cfg.buy_in||0),fee=Number(cfg.fee||0),prize=Math.max(0,buy-fee);
+  const paidN=(players||[]).filter(x=>x.has_paid).length;
+  const pl=el(`<div class="card">
+    <div style="font-weight:900;font-size:16px;margin-bottom:2px">👥 Jugadores y pagos</div>
+    <p class="muted" style="font-size:12px;margin:0 0 8px">Cuando recibas la transferencia de alguien, prende su interruptor <b>pagó</b>. Cada jugador aparece aquí en cuanto se registra.</p>
+    <div class="breakdown" style="margin:0 0 10px">
+      <div class="brk"><span>✅ Pagaron</span><span class="v">${paidN} de ${(players||[]).length}</span></div>
+      <div class="brk prize"><span>🏆 Bote del ganador</span><span class="v">${money(prize*paidN,cfg.currency)}</span></div>
+      <div class="brk fee"><span>🛠️ Tu comisión acumulada</span><span class="v">${money(fee*paidN,cfg.currency)}</span></div>
+    </div>
+  </div>`);
   (players||[]).forEach(pr=>{
     const row=el(`<div class="switch">
       <div><b>${esc(pr.display_name)}</b>${pr.is_admin?' <span class="pill round">admin</span>':''}</div>
