@@ -394,7 +394,7 @@ async function viewTabla(){
     <div class="amt">${money(pot,cfg.currency)}</div>
     <div style="font-size:12px;opacity:.92">${paid} pagado(s) × ${money(prizePer,cfg.currency)} c/u</div>
   </div>`));
-  const card=el('<div class="card"><div style="font-weight:900;font-size:18px;margin-bottom:6px">Tabla de posiciones</div></div>');
+  const card=el('<div class="card"><div style="font-weight:900;font-size:18px">Tabla de posiciones</div><p class="muted" style="font-size:11.5px;margin:2px 0 8px">1 punto por cada acierto. Los puntos suman cuando el partido se juega.</p></div>');
   if(!rows.length){card.appendChild(el('<p class="muted">Aún no hay jugadores.</p>'));}
   rows.forEach((r,i)=>{
     const me=r.user_id===STATE.user.id;
@@ -402,8 +402,8 @@ async function viewTabla(){
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
     card.appendChild(el(`<div class="lead-row" style="${me?'background:#f0fdf4;border-radius:10px':''}">
       <div class="rank ${g}">${medal}</div>
-      <div class="nm">${esc(r.display_name)}${me?' <span class="muted">(tú)</span>':''} ${r.has_paid?'<span class="pill paid">pagó</span>':'<span class="pill unpaid">debe</span>'}<div class="muted" style="font-size:11px;font-weight:600">${r.points} de ${r.graded} jugados · ${r.total_picks} picks</div></div>
-      <div class="pts">${r.points}</div>
+      <div class="nm">${esc(r.display_name)}${me?' <span class="muted">(tú)</span>':''} ${r.has_paid?'<span class="pill paid">pagó</span>':'<span class="pill unpaid">debe</span>'}<div class="muted" style="font-size:11px;font-weight:600">🎯 ${r.total_picks} pronósticos · ${r.graded} ya jugado${r.graded===1?'':'s'}</div></div>
+      <div style="text-align:center;flex-shrink:0"><div class="pts">${r.points}</div><div class="muted" style="font-size:10px;font-weight:800;margin-top:-4px;letter-spacing:.5px">PTS</div></div>
     </div>`));
   });
   c.appendChild(card);
