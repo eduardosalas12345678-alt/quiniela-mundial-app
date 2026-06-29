@@ -331,25 +331,14 @@ async function viewPartidos(){
     const upd=()=>{const e=banner.querySelector('#cd');if(!e)return;const ms=nextLock-Date.now();if(ms<=0){e.textContent='Sincronizando el próximo cierre…';return;}const s=Math.floor(ms/1000),h=Math.floor(s/3600),mn=Math.floor(s%3600/60),se=s%60;e.textContent='⏳ Próximo cierre en '+(h>0?h+'h ':'')+mn+'m '+se+'s';};
     upd();window._qt=setInterval(upd,1000);
   }
-  // group by round preserving order
+  // group by round — solo partidos YA definidos (con equipos reales); los demás aparecen al definirse
   const groups=[];const idx={};
-  matches.forEach(m=>{const r=m.round||'Eliminatoria';if(!(r in idx)){idx[r]=groups.length;groups.push({round:r,items:[]});}groups[idx[r]].items.push(m);});
+  matches.filter(isDefined).forEach(m=>{const r=m.round||'Eliminatoria';if(!(r in idx)){idx[r]=groups.length;groups.push({round:r,items:[]});}groups[idx[r]].items.push(m);});
+  if(!groups.length){c.appendChild(el(`<div class="card center"><div style="font-size:34px">⏳</div><p class="muted">Aún no hay partidos para elegir. Aparecerán en cuanto se definan los equipos de la siguiente ronda.</p></div>`));shell(c);return;}
   groups.forEach(g=>{
     const sec=el(`<div class="card"><div class="round-head">${esc(g.round)} <span class="chip">${g.items.length}</span></div></div>`);
     g.items.forEach(m=>{
       const now=new Date();const lockAt=new Date(new Date(m.kickoff).getTime()-LOCK_MS);const locked=now>=lockAt;
-      if(!isDefined(m)){
-        sec.appendChild(el(`<div class="match tbd">
-          <div class="meta"><span class="pill round">${esc(m.round||'')}</span><span>${esc(fmtDate(m.kickoff))}</span></div>
-          <div class="teams">
-            <div class="tbd-slot"><span class="flag flag-ph flag-lg">🏳️</span>${esc(prettySlot(m.team1))}</div>
-            <div class="vs">VS</div>
-            <div class="tbd-slot"><span class="flag flag-ph flag-lg">🏳️</span>${esc(prettySlot(m.team2))}</div>
-          </div>
-          <div class="center" style="margin-top:8px"><span class="muted" style="font-size:11px">⏳ Por definirse — podrás elegir cuando se conozcan los equipos</span></div>
-        </div>`));
-        return;
-      }
       const myPick=pmap[m.id];
       const tv=tally[m.id]||{1:0,2:0};const votes=(tv[1]||0)+(tv[2]||0);
       const t1cls='team'+(m.result===1?' win':'')+(myPick===1?' sel':'')+(locked?' locked':'');
