@@ -402,7 +402,7 @@ async function viewTabla(){
     const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1);
     card.appendChild(el(`<div class="lead-row" style="${me?'background:#f0fdf4;border-radius:10px':''}">
       <div class="rank ${g}">${medal}</div>
-      <div class="nm">${esc(r.display_name)}${me?' <span class="muted">(tú)</span>':''} ${r.has_paid?'<span class="pill paid">pagó</span>':'<span class="pill unpaid">debe</span>'}<div class="muted" style="font-size:11px;font-weight:600">🎯 ${r.total_picks} pronósticos · ${r.graded} ya jugado${r.graded===1?'':'s'}</div></div>
+      <div class="nm">${esc(r.display_name)}${me?' <span class="muted">(tú)</span>':''}${STATE.profile.is_admin?(r.has_paid?' <span class="pill paid">pagó</span>':' <span class="pill unpaid">debe</span>'):''}<div class="muted" style="font-size:11px;font-weight:600">🎯 ${r.total_picks} pronósticos · ${r.graded} ya jugado${r.graded===1?'':'s'}</div></div>
       <div style="text-align:center;flex-shrink:0"><div class="pts">${r.points}</div><div class="muted" style="font-size:10px;font-weight:800;margin-top:-4px;letter-spacing:.5px">PTS</div></div>
     </div>`));
   });
