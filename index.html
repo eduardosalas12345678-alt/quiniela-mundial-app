@@ -130,6 +130,8 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const ROUNDS = ["Dieciseisavos (R32)","Octavos","Cuartos","Semifinal","Tercer lugar","Final"];
 const app = document.getElementById('app');
 let STATE = { user:null, profile:null, config:null, tab:'partidos', authMode:'login' };
+const APP_URL = "https://eduardosalas12345678-alt.github.io/quiniela-mundial-app/";
+function invitar(){const url=APP_URL,msg='⚽🏆 ¡Únete a la Quiniela Mundial 2026! Predice quién avanza y gana el bote.';if(navigator.share){navigator.share({title:'Quiniela Mundial 2026',text:msg,url}).catch(()=>{});}else{window.open('https://wa.me/?text='+encodeURIComponent(msg+' '+url),'_blank');}}
 
 // ---------- helpers ----------
 const el = (h)=>{const t=document.createElement('template');t.innerHTML=h.trim();return t.content.firstChild;};
@@ -273,6 +275,7 @@ function shell(content){
   app.appendChild(el(`<header class="top">
     <h1>⚽ Quiniela 2026</h1>
     <div class="who"><span>${esc(p.display_name||'')}${p.is_admin?' · admin':''}</span>
+    <button id="hdr-invite" class="btn ghost">📲 Invitar</button>
     <button id="logout" class="btn ghost">Salir</button></div>
   </header>`));
   const w=el('<div class="wrap"></div>');w.appendChild(content);app.appendChild(w);
@@ -286,10 +289,12 @@ function shell(content){
   nav.querySelectorAll('button').forEach(b=>b.onclick=()=>{STATE.tab=b.dataset.t;route();});
   app.appendChild(nav);
   document.getElementById('logout').onclick=async()=>{await sb.auth.signOut();location.reload();};
+  const hi=document.getElementById('hdr-invite');if(hi)hi.onclick=invitar;
 }
 function loading(){const c=el('<div></div>');c.appendChild(el('<div class="card center muted">Cargando...</div>'));shell(c);}
 
 function route(){
+  if(window._qt){clearInterval(window._qt);window._qt=null;}
   if(STATE.tab==='partidos')viewPartidos();
   else if(STATE.tab==='tabla')viewTabla();
   else if(STATE.tab==='bote')viewBote();
@@ -301,15 +306,30 @@ async function viewPartidos(){
   loading();
   const [{data:matches,error:me},{data:preds}] = await Promise.all([
     sb.from('matches').select('*').order('kickoff',{ascending:true}).order('sort_order',{ascending:true}),
-    sb.from('predictions').select('match_id,pick').eq('user_id',STATE.user.id)
+    sb.from('predictions').select('user_id,match_id,pick')
   ]);
-  const pmap={};(preds||[]).forEach(p=>pmap[p.match_id]=p.pick);
+  const pmap={};const tally={};
+  (preds||[]).forEach(p=>{if(p.user_id===STATE.user.id)pmap[p.match_id]=p.pick;const t=(tally[p.match_id]=tally[p.match_id]||{1:0,2:0});t[p.pick]=(t[p.pick]||0)+1;});
   const c=el('<div></div>');
   c.appendChild(el(`<div class="hint">Elige quién <b>gana/avanza</b> en cada partido. <b>1 punto</b> por acierto. Tu pick se <b>bloquea 1 hora antes</b> del partido. En knockout cuenta quién pasa (incluye penales).</div>`));
   if(me){c.appendChild(el('<div class="card err">No se pudieron cargar los partidos.</div>'));shell(c);return;}
   if(!matches||!matches.length){
     c.appendChild(el(`<div class="card center"><div style="font-size:34px">🗓️</div><p class="muted">Aún no hay partidos cargados.${STATE.profile.is_admin?' Ve a <b>Admin</b> para agregarlos.':' El organizador los agregará pronto.'}</p></div>`));
     shell(c);return;
+  }
+  // banner: cuántos faltan + cuenta regresiva al próximo cierre
+  const nowT=Date.now();
+  const openDef=matches.filter(m=>isDefined(m) && (new Date(m.kickoff).getTime()-LOCK_MS)>nowT);
+  if(openDef.length){
+    const pending=openDef.filter(m=>!pmap[m.id]).length;
+    const nextLock=openDef.reduce((a,m)=>Math.min(a,new Date(m.kickoff).getTime()-LOCK_MS),Infinity);
+    const banner=el(`<div class="card" style="background:linear-gradient(135deg,#0b132b,#1c2541);color:#fff;border:0">
+      <div style="font-weight:800;font-size:14px">${pending>0?('⏰ Te faltan '+pending+' partido'+(pending>1?'s':'')+' por elegir'):'✅ Vas al día con tus picks'}</div>
+      <div id="cd" style="font-size:12.5px;color:#cbd5e1;margin-top:3px"></div>
+    </div>`);
+    c.appendChild(banner);
+    const upd=()=>{const e=banner.querySelector('#cd');if(!e)return;const ms=nextLock-Date.now();if(ms<=0){e.textContent='Sincronizando el próximo cierre…';return;}const s=Math.floor(ms/1000),h=Math.floor(s/3600),mn=Math.floor(s%3600/60),se=s%60;e.textContent='⏳ Próximo cierre en '+(h>0?h+'h ':'')+mn+'m '+se+'s';};
+    upd();window._qt=setInterval(upd,1000);
   }
   // group by round preserving order
   const groups=[];const idx={};
@@ -331,6 +351,7 @@ async function viewPartidos(){
         return;
       }
       const myPick=pmap[m.id];
+      const tv=tally[m.id]||{1:0,2:0};const votes=(tv[1]||0)+(tv[2]||0);
       const t1cls='team'+(m.result===1?' win':'')+(myPick===1?' sel':'')+(locked?' locked':'');
       const t2cls='team'+(m.result===2?' win':'')+(myPick===2?' sel':'')+(locked?' locked':'');
       let status='';
@@ -347,7 +368,7 @@ async function viewPartidos(){
           <div class="vs">VS</div>
           <div class="${t2cls}" data-pick="2">${flag(m.team2_logo,'flag-lg')}<span>${esc(m.team2)}</span>${m.team2_code?'<small>'+esc(m.team2_code)+'</small>':''}</div>
         </div>
-        <div class="center" style="margin-top:8px">${status}</div>
+        <div class="center" style="margin-top:8px">${status}${(locked&&votes>0)?'<div class="muted" style="font-size:11px;margin-top:5px;font-weight:600">👥 '+esc(m.team1)+' '+(tv[1]||0)+' · '+esc(m.team2)+' '+(tv[2]||0)+'</div>':''}</div>
       </div>`);
       if(!locked){
         card.querySelectorAll('[data-pick]').forEach(tb=>{
@@ -433,6 +454,7 @@ function viewBote(){
     <p class="muted" style="font-size:12px;margin-top:10px">De cada inscripción, ${money(prize,cfg.currency)} va al bote del ganador y ${money(fee,cfg.currency)} es la comisión por organizar y administrar.</p>`:''}
     ${cfg.pot_note?`<p class="muted" style="margin-top:10px">${esc(cfg.pot_note)}</p>`:''}
   </div>`));
+  const inv=el('<button class="btn gold" style="width:100%;font-size:15px;margin-bottom:4px">📲 Invitar amigos por WhatsApp</button>');inv.onclick=invitar;c.appendChild(inv);
   const pays=el('<div class="card"><div style="font-weight:900;font-size:16px">Paga al organizador</div><p class="muted" style="font-size:12.5px;margin:6px 0 0">Manda tu inscripción por cualquiera de estas vías. Escanea el QR o copia el dato. El organizador marca tu pago en la app.</p></div>');
   const z=payRow('Zelle','💳',cfg.zelle_handle,null);
   const ca=payRow('Cash App','🟢',cfg.cashapp_handle,cfg.cashapp_handle?('https://cash.app/'+(String(cfg.cashapp_handle).startsWith('$')?'':'$')+String(cfg.cashapp_handle).replace(/^\$/,'')):null);
