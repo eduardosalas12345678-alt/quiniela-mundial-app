@@ -580,12 +580,14 @@ submitBtn.addEventListener("click", async ()=>{
     attending: attending==="yes",
     party_size: attending==="yes"? count : 0,
     lang: LANG,
-    created_at: new Date().toISOString()
+    updated_at: new Date().toISOString()
   };
   let saved=false;
   if(sb){
     try{
-      const { error } = await sb.from(CONFIG.supabase.table).insert([record]);
+      // upsert por teléfono: si ya confirmó, actualiza su respuesta
+      const { error } = await sb.from(CONFIG.supabase.table)
+        .upsert([record], { onConflict: "phone" });
       if(!error) saved=true;
     }catch(e){}
   }
