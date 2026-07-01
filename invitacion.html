@@ -131,6 +131,11 @@ button{font-family:inherit; cursor:pointer; border:0}
 .info-card.wide{grid-column:1 / -1}
 .map-btn{display:inline-flex; align-items:center; gap:8px; margin-top:14px; background:var(--teal-d); color:#fff;
   font-weight:600; padding:13px 22px; border-radius:999px; text-decoration:none; box-shadow:0 8px 20px rgba(14,124,134,.35)}
+.cal-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+.cal-btn{display:inline-flex; align-items:center; gap:8px; padding:13px 20px; border-radius:999px; font-weight:600; font-size:15px;
+  background:var(--tefiti-d); color:#fff; text-decoration:none; box-shadow:0 8px 20px rgba(76,175,80,.3); cursor:pointer; border:0; font-family:inherit}
+.cal-btn.ghost{background:#eef7f8; color:var(--teal-d); box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.cal-btn:active{transform:scale(.98)}
 
 /* Dress code */
 .dress{background:linear-gradient(160deg,#fef1ea,#ffe0cf)}
@@ -252,6 +257,10 @@ input:focus,select:focus{outline:none; border-color:var(--teal); box-shadow:0 0 
         <a class="map-btn" id="mapBtn" target="_blank" rel="noopener"><span>🗺️</span><span data-t="mapBtn"></span></a>
       </div>
     </div>
+    <div class="cal-row">
+      <button class="cal-btn" id="icsBtn"><span>📅</span><span data-t="calBtn"></span></button>
+      <a class="cal-btn ghost" id="gcalBtn" target="_blank" rel="noopener"><span>📆</span><span data-t="gcalBtn"></span></a>
+    </div>
   </section>
 
   <!-- Dress code -->
@@ -345,6 +354,14 @@ const CONFIG = {
     address: "2000 Spencer Mountain Rd, Gastonia, NC 28054",
     mapUrl: "https://www.google.com/maps/search/?api=1&query=2000%20Spencer%20Mountain%20Rd%2C%20Gastonia%2C%20NC%2028054"
   },
+  // Para "Añadir al calendario". Horas en UTC (Gastonia NC = hora del Este, EDT = UTC-4 en octubre).
+  // 24 oct 2026, 4:00 PM EDT = 20:00 UTC ; 9:30 PM EDT = 01:30 UTC del día 25.
+  calendar: {
+    title: "Primer Añito de Zahirelys 🌺",
+    startUTC: "20261024T200000Z",
+    endUTC:   "20261025T013000Z",
+    details:  "¡Te esperamos para celebrar el primer añito de Zahirelys! Tema: Moana 🌊 Confirma en la invitación."
+  },
   maxGuests: 6,                       // máximo de acompañantes permitidos
   // Supabase: guarda confirmaciones. Si falla, usa almacenamiento local (demo).
   // Proyecto dedicado: invitacion-moana
@@ -385,6 +402,7 @@ const I18N = {
     detailsTitle:"¿Cuándo y dónde?",
     lblDate:"Fecha", lblTime:"Hora", lblPlace:"Lugar",
     mapBtn:"Ver en el mapa",
+    calBtn:"Añadir al calendario", gcalBtn:"Google Calendar",
     dressEyebrow:"Código de vestimenta",
     dressTitle:"Únete a la tripulación",
     dressBody:"Moana necesita una tripulación especial. Ven vestid@ como parte de la aventura: colores tropicales, flores o motivos del océano. ¡Nuestra travesía será aún más especial con el espíritu de Moana!",
@@ -426,6 +444,7 @@ const I18N = {
     detailsTitle:"When & where?",
     lblDate:"Date", lblTime:"Time", lblPlace:"Place",
     mapBtn:"Open in maps",
+    calBtn:"Add to calendar", gcalBtn:"Google Calendar",
     dressEyebrow:"Dress code",
     dressTitle:"Join the crew",
     dressBody:"Moana needs a special crew. Come dressed as part of the adventure: tropical colors, flowers or ocean motifs. Our voyage will be even more special with the spirit of Moana!",
@@ -476,6 +495,30 @@ try{ sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.key)
 
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3200); }
 
+/* ===== Añadir al calendario ===== */
+function icsContent(){
+  const c=CONFIG.calendar, loc=(CONFIG.place.address||CONFIG.place.es).replace(/,/g,"\\,");
+  return [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Zahirelys//Invitacion Moana//ES","CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT","UID:zahirelys-primer-anito@invitacion","DTSTAMP:"+c.startUTC,
+    "DTSTART:"+c.startUTC,"DTEND:"+c.endUTC,
+    "SUMMARY:"+c.title,"LOCATION:"+loc,"DESCRIPTION:"+c.details,
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+}
+function downloadICS(){
+  const blob=new Blob([icsContent()],{type:"text/calendar;charset=utf-8"});
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download="Zahirelys-Primer-Anito.ics"; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 800);
+}
+function gcalUrl(){
+  const c=CONFIG.calendar;
+  const p=new URLSearchParams({ action:"TEMPLATE", text:c.title, dates:c.startUTC+"/"+c.endUTC,
+    details:c.details, location:(CONFIG.place.address||CONFIG.place.es) });
+  return "https://calendar.google.com/calendar/render?"+p.toString();
+}
+
 /* apply translations + config to DOM */
 function applyLang(){
   document.documentElement.lang = LANG;
@@ -492,6 +535,7 @@ function applyLang(){
   $("#valTime").textContent = CONFIG.time;
   $("#valPlace").textContent = CONFIG.place[LANG];
   $("#mapBtn").href = CONFIG.place.mapUrl;
+  $("#gcalBtn").href = gcalUrl();
   [ "#coverPhoto", "#heroPhoto" ].forEach(sel=>{
     const im = $(sel); if(!im) return;
     im.onerror = ()=>{ im.onerror=null; im.src = CONFIG.photoFallback; };
@@ -636,6 +680,8 @@ $("#editBtn").addEventListener("click",()=>{
   $("#thanksBlock").classList.add("hidden");
   $("#rsvpForm").classList.remove("hidden");
 });
+
+$("#icsBtn").addEventListener("click", downloadICS);
 
 /* init default lang render (in case) */
 applyLang();
