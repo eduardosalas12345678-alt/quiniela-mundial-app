@@ -327,7 +327,8 @@ input:focus,select:focus{outline:none; border-color:var(--teal); box-shadow:0 0 
    ========================================================= */
 const CONFIG = {
   babyName: "Zahirelys",             // nombre real de la bebé
-  photo: "assets/moana-beach.jpg",   // TODO: reemplazar por assets/zahirelys.jpg cuando llegue la foto real
+  photo: "assets/zahirelys.jpg",     // foto real (si aún no existe, usa el placeholder de abajo)
+  photoFallback: "assets/moana-beach.jpg",
   date: { es: "Sábado 24 de Octubre, 2026", en: "Saturday, October 24, 2026" },
   time: "4:00 PM – 9:30 PM",
   place: {
@@ -483,8 +484,11 @@ function applyLang(){
   $("#valTime").textContent = CONFIG.time;
   $("#valPlace").textContent = CONFIG.place[LANG];
   $("#mapBtn").href = CONFIG.place.mapUrl;
-  $("#coverPhoto").src = CONFIG.photo;
-  $("#heroPhoto").src = CONFIG.photo;
+  [ "#coverPhoto", "#heroPhoto" ].forEach(sel=>{
+    const im = $(sel); if(!im) return;
+    im.onerror = ()=>{ im.onerror=null; im.src = CONFIG.photoFallback; };
+    im.src = CONFIG.photo;
+  });
 }
 
 /* =========================================================
