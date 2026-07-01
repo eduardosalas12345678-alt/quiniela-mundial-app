@@ -197,9 +197,8 @@ input:focus,select:focus{outline:none; border-color:var(--teal); box-shadow:0 0 
 <div class="float" style="top:64%;right:-4px;font-size:60px;animation-delay:1.5s;mix-blend-mode:normal" aria-hidden="true">🌼</div>
 
 <button id="music" title="Música">🔈</button>
-<audio id="audio" loop preload="none">
-  <!-- El freelancer puede poner aquí un clip de música ambiental de playa/ukelele -->
-  <!-- <source src="assets/musica.mp3" type="audio/mpeg"> -->
+<audio id="audio" loop preload="auto">
+  <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <!-- ===== LANGUAGE GATE ===== -->
@@ -530,10 +529,14 @@ function revealSections(){
    Music
    ========================================================= */
 let musicOn=false;
-function tryPlayMusic(){ /* autoplay suele bloquearse; el usuario activa con el botón */ }
+// Se llama al tocar "Abrir invitación" (gesto del usuario) => el navegador permite el sonido
+function tryPlayMusic(){
+  const a=$("#audio");
+  a.volume=0.7;
+  a.play().then(()=>{ musicOn=true; $("#music").textContent="🔊"; }).catch(()=>{ /* si el navegador lo bloquea, queda el botón */ });
+}
 $("#music").addEventListener("click",()=>{
   const a=$("#audio");
-  if(!a.querySelector("source")){ toast(LANG==="es"?"Agrega tu música en assets/musica.mp3":"Add your music at assets/musica.mp3"); return; }
   if(musicOn){ a.pause(); $("#music").textContent="🔈"; }
   else{ a.play().catch(()=>{}); $("#music").textContent="🔊"; }
   musicOn=!musicOn;
