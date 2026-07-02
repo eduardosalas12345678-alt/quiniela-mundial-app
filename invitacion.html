@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+<title>Invitación · Moana 🌺</title>
+<meta name="theme-color" content="#0e7c86" />
+<!-- Vista previa al compartir en WhatsApp / redes -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="🌺 Zahirelys · Primer Añito / First Birthday" />
+<meta property="og:description" content="¡Acompáñanos a celebrar! Toca para ver fecha, lugar y confirmar. · Come celebrate! Tap to see the date, place & RSVP. 🌊" />
+<meta property="og:image" content="https://zahirelys-moana.netlify.app/cover.jpg" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:url" content="https://zahirelys-moana.netlify.app" />
+<meta property="og:locale" content="es_ES" />
+<meta property="og:locale:alternate" content="en_US" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Fredoka:wght@400;500;600;700&family=Gochi+Hand&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  /* Gama Moana */
+  --coral:#f4a28c; --coral-d:#e8795f;
+  --arena:#f6e7c8; --arena-d:#efd9a8;
+  --melon:#ffcba4;
+  --teal:#2ec4b6; --teal-d:#0e7c86; --teal-dd:#08596a;
+  --ocean:#1a94a8; --ocean-deep:#0b5c6b;
+  --tefiti:#7ed957; --tefiti-d:#4caf50;
+  --hibiscus:#e84b78; --hibiscus-d:#c9366a;
+  --sun:#f5b301; --sun-2:#f7c948;
+  --ink:#3a2416; --ink-soft:#6b4f3a; --paper:#fffaf0;
+  --shadow:0 14px 40px rgba(8,60,80,.28);
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Fredoka",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  color:var(--ink); background:#08596a; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Berkshire Swash",cursive; font-weight:400; margin:0; line-height:1.05}
+.hand{font-family:"Gochi Hand",cursive}
+img{max-width:100%; display:block}
+button{font-family:inherit; cursor:pointer; border:0}
+.hidden{display:none !important}
+
+/* ---------- Ocean background (compartido) ---------- */
+.ocean-bg{position:fixed; inset:0; z-index:0;
+  background:linear-gradient(180deg,#7fd8e8 0%, #38b6c9 32%, #1a94a8 60%, #0b5c6b 100%);
+}
+.ocean-bg .sunbeam{position:absolute; top:-12%; left:50%; width:120vw; height:70vh; transform:translateX(-50%);
+  background:radial-gradient(ellipse at center,rgba(255,240,200,.65),transparent 60%); filter:blur(6px)}
+.wave{position:absolute; left:0; width:200%; height:120px; background-repeat:repeat-x;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='120'><path d='M0 60 C150 10 300 110 450 60 C600 10 750 110 900 60 C1050 10 1200 110 1350 60 L1350 120 L0 120 Z' fill='%23ffffff' opacity='0.5'/></svg>");
+  animation:waveMove 9s linear infinite}
+.wave.w2{bottom:26px; opacity:.6; animation-duration:13s; animation-direction:reverse; background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='120'><path d='M0 60 C150 10 300 110 450 60 C600 10 750 110 900 60 C1050 10 1200 110 1350 60 L1350 120 L0 120 Z' fill='%23eafbff' opacity='0.7'/></svg>")}
+.wave.w1{bottom:0}
+@keyframes waveMove{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* Floating decorations */
+.float{position:fixed; z-index:1; pointer-events:none; opacity:.9; mix-blend-mode:multiply; animation:floaty 7s ease-in-out infinite}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-16px) rotate(4deg)}}
+
+/* ---------- LANGUAGE GATE ---------- */
+#gate{position:fixed; inset:0; z-index:60; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:24px; color:#fff}
+#gate .sun-spin{width:120px; height:120px; margin-bottom:6px; animation:spin 26s linear infinite; filter:drop-shadow(0 6px 14px rgba(0,0,0,.25))}
+@keyframes spin{to{transform:rotate(360deg)}}
+#gate h1{font-size:clamp(34px,10vw,58px); color:#fff; text-shadow:0 4px 18px rgba(3,40,55,.5)}
+#gate p{margin:8px 0 26px; font-size:16px; opacity:.95; letter-spacing:.3px}
+.lang-btns{display:flex; gap:14px; flex-wrap:wrap; justify-content:center}
+.lang-btn{background:rgba(255,255,255,.16); backdrop-filter:blur(6px); border:2px solid rgba(255,255,255,.55);
+  color:#fff; font-weight:600; font-size:18px; padding:15px 30px; border-radius:999px; min-width:150px;
+  transition:.18s; box-shadow:0 8px 20px rgba(0,0,0,.2)}
+.lang-btn:active{transform:scale(.96)}
+.lang-btn:hover{background:#fff; color:var(--teal-d)}
+
+/* ---------- COVER (video-style) ---------- */
+#cover{position:fixed; inset:0; z-index:50; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:26px 20px; color:#fff}
+.cover-card{position:relative; z-index:2; width:min(420px,92vw); animation:rise .8s ease both}
+@keyframes rise{from{opacity:0; transform:translateY(30px)}to{opacity:1; transform:translateY(0)}}
+.cover-kicker{font-size:13px; letter-spacing:3px; text-transform:uppercase; opacity:.9; margin-bottom:8px}
+.cover-photo{width:190px; height:190px; margin:0 auto 14px; border-radius:50%; overflow:hidden;
+  border:6px solid #fff; box-shadow:var(--shadow); background:#cfeff5}
+.cover-photo img{width:100%; height:100%; object-fit:cover; object-position:center 18%}
+#cover h1{font-size:clamp(40px,13vw,70px); color:#fff; text-shadow:0 5px 20px rgba(3,40,55,.55)}
+.cover-age{font-family:"Gochi Hand",cursive; font-size:22px; margin-top:2px; color:#fff}
+.tap-btn{margin-top:22px; background:linear-gradient(135deg,var(--sun),var(--coral-d));
+  color:#4a2600; font-weight:700; font-size:17px; padding:16px 26px; border-radius:999px;
+  box-shadow:0 10px 26px rgba(233,121,95,.5); animation:pulse 2s ease-in-out infinite; letter-spacing:.3px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.tap-hint{margin-top:12px; font-size:13px; opacity:.85}
+.envelope{font-size:30px; margin-bottom:4px; animation:floaty 5s ease-in-out infinite; display:inline-block}
+
+/* Music toggle */
+#music{position:fixed; top:14px; right:14px; z-index:70; width:44px; height:44px; border-radius:50%;
+  background:rgba(255,255,255,.22); backdrop-filter:blur(6px); border:1.5px solid rgba(255,255,255,.6);
+  color:#fff; font-size:20px; display:flex; align-items:center; justify-content:center}
+
+/* ---------- INVITATION ---------- */
+#invite{position:relative; z-index:5; max-width:560px; margin:0 auto; padding:26px 16px 60px}
+.section{background:var(--paper); border-radius:26px; padding:26px 22px; margin:18px 0; box-shadow:var(--shadow);
+  position:relative; overflow:hidden; opacity:0; transform:translateY(28px); transition:.7s cubic-bezier(.2,.8,.2,1)}
+.section.in{opacity:1; transform:none}
+.section .corner{position:absolute; width:120px; opacity:.9; mix-blend-mode:multiply; pointer-events:none}
+.eyebrow{display:inline-block; font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--teal-d);
+  font-weight:600; background:#e4f7f5; padding:5px 12px; border-radius:999px; margin-bottom:12px}
+.section h2{font-size:clamp(26px,7vw,36px); color:var(--teal-d); margin-bottom:8px}
+.section p{font-size:16px; line-height:1.55; color:var(--ink-soft); margin:8px 0}
+.center{text-align:center}
+.divider{height:2px; background:repeating-linear-gradient(90deg,var(--coral) 0 14px,transparent 14px 24px); margin:16px auto; width:70%; opacity:.6}
+
+/* Hero welcome */
+.hero{background:linear-gradient(160deg,#fff6e6,#ffe7d3); text-align:center}
+.hero .big-quote{font-family:"Berkshire Swash",cursive; font-size:clamp(22px,6vw,30px); color:var(--hibiscus-d); line-height:1.25; margin:6px 0 4px}
+.name-frame{width:210px; height:210px; margin:16px auto; border-radius:24px; overflow:hidden; position:relative;
+  border:8px solid #fff; box-shadow:0 12px 30px rgba(200,54,106,.28); background:#cfeff5}
+.name-frame img{width:100%; height:100%; object-fit:cover; object-position:center 15%}
+.name-frame .tag{position:absolute; bottom:0; left:0; right:0; background:linear-gradient(0deg,rgba(11,92,107,.85),transparent);
+  color:#fff; font-family:"Gochi Hand",cursive; font-size:20px; padding:22px 8px 8px}
+
+/* Event details */
+.info-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
+.info-card{background:linear-gradient(160deg,#eafaf8,#d6f2ee); border-radius:18px; padding:16px 12px; text-align:center;
+  border:2px solid #bfeae3}
+.info-card .ic{font-size:30px}
+.info-card .lbl{font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--teal-d); font-weight:600; margin-top:6px}
+.info-card .val{font-size:18px; font-weight:600; color:var(--ink); margin-top:2px}
+.info-card.wide{grid-column:1 / -1}
+.map-btn{display:inline-flex; align-items:center; gap:8px; margin-top:14px; background:var(--teal-d); color:#fff;
+  font-weight:600; padding:13px 22px; border-radius:999px; text-decoration:none; box-shadow:0 8px 20px rgba(14,124,134,.35)}
+.cal-row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+.cal-btn{display:inline-flex; align-items:center; gap:8px; padding:13px 20px; border-radius:999px; font-weight:600; font-size:15px;
+  background:var(--tefiti-d); color:#fff; text-decoration:none; box-shadow:0 8px 20px rgba(76,175,80,.3); cursor:pointer; border:0; font-family:inherit}
+.cal-btn.ghost{background:#eef7f8; color:var(--teal-d); box-shadow:0 6px 16px rgba(0,0,0,.08)}
+.cal-btn:active{transform:scale(.98)}
+
+/* Dress code */
+.dress{background:linear-gradient(160deg,#fef1ea,#ffe0cf)}
+.chars{display:flex; gap:12px; justify-content:center; margin:16px 0 4px; flex-wrap:wrap}
+.char{width:130px; background:#fff; border-radius:18px; padding:10px; box-shadow:0 8px 18px rgba(0,0,0,.1); text-align:center}
+.char img{border-radius:12px; height:110px; width:100%; object-fit:cover; object-position:center}
+.char span{display:block; font-family:"Gochi Hand",cursive; font-size:18px; margin-top:8px; color:var(--coral-d)}
+.palette{display:flex; gap:8px; justify-content:center; margin-top:14px}
+.swatch{width:44px; height:44px; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.15)}
+
+/* RSVP */
+.rsvp{background:linear-gradient(160deg,#e9fbff,#cdeef6)}
+label{display:block; font-weight:600; font-size:14px; color:var(--teal-dd); margin:14px 0 6px}
+input,select{width:100%; padding:15px 16px; border:2px solid #bfe4ec; border-radius:14px; font-size:16px;
+  background:#fff; color:var(--ink); font-family:inherit; transition:.15s}
+input:focus,select:focus{outline:none; border-color:var(--teal); box-shadow:0 0 0 4px rgba(46,196,182,.18)}
+.field-note{font-size:13px; margin-top:7px; min-height:18px; font-weight:500}
+.field-note.ok{color:var(--tefiti-d)} .field-note.err{color:var(--hibiscus-d)}
+.count-row{display:flex; align-items:center; gap:14px; justify-content:center; margin-top:8px}
+.count-btn{width:52px; height:52px; border-radius:50%; background:var(--teal-d); color:#fff; font-size:26px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; box-shadow:0 6px 14px rgba(14,124,134,.35)}
+.count-btn:disabled{opacity:.4}
+.count-val{font-size:40px; font-weight:700; min-width:60px; text-align:center; color:var(--teal-dd)}
+.count-cap{text-align:center; font-size:13px; color:var(--ink-soft); margin-top:2px}
+.submit-btn{width:100%; margin-top:20px; background:linear-gradient(135deg,var(--tefiti-d),var(--teal-d)); color:#fff;
+  font-weight:700; font-size:18px; padding:17px; border-radius:16px; box-shadow:0 12px 26px rgba(14,124,134,.4); transition:.15s}
+.submit-btn:disabled{opacity:.5; box-shadow:none}
+.submit-btn:active{transform:scale(.99)}
+.decline-btn{width:100%; margin-top:10px; background:transparent; color:var(--ink-soft); font-weight:600; font-size:14px; padding:10px}
+.seg{display:flex; background:#d6eef4; border-radius:14px; padding:4px; margin-top:6px}
+.seg button{flex:1; padding:12px; border-radius:11px; background:transparent; font-weight:600; font-size:15px; color:var(--teal-dd); transition:.15s}
+.seg button.on{background:#fff; color:var(--teal-d); box-shadow:0 3px 8px rgba(0,0,0,.12)}
+
+/* Thank you */
+.thanks{text-align:center; background:linear-gradient(160deg,#eafff0,#d4f6e2)}
+.thanks .check{font-size:64px; animation:pop .5s ease both}
+@keyframes pop{0%{transform:scale(0)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+
+/* Farewell */
+.farewell{background:linear-gradient(160deg,var(--teal-d),var(--ocean-deep)); color:#fff; text-align:center}
+.farewell h2{color:#fff}
+.farewell p{color:#eafbff}
+.farewell .sig{font-family:"Gochi Hand",cursive; font-size:24px; margin-top:14px}
+.footer{text-align:center; color:#d9f2f5; font-size:12px; padding:18px 10px 0; position:relative; z-index:5}
+.footer a{color:#fff}
+
+/* toast */
+#toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120px); z-index:90;
+  background:var(--ink); color:#fff; padding:14px 22px; border-radius:14px; font-weight:600; box-shadow:0 10px 30px rgba(0,0,0,.35);
+  transition:.35s; max-width:90vw; text-align:center}
+#toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="ocean-bg" aria-hidden="true">
+  <div class="sunbeam"></div>
+  <div class="wave w2"></div>
+  <div class="wave w1"></div>
+</div>
+
+<!-- floating flowers (decor) -->
+<img class="float" src="assets/hibiscus-single-pink.jpg" style="top:12%;left:-14px;width:90px" aria-hidden="true">
+<img class="float" src="assets/hibiscus-yellow.jpg" style="top:64%;right:-10px;width:84px;animation-delay:1.5s" aria-hidden="true">
+
+<button id="music" title="Música">🔈</button>
+<audio id="audio" loop preload="auto">
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- ===== LANGUAGE GATE ===== -->
+<div id="gate">
+  <img class="sun-spin" src="assets/sun.jpg" alt="sol Moana" style="border-radius:50%;mix-blend-mode:screen">
+  <h1>Aloha 🌺</h1>
+  <p data-i18n-static>Elige tu idioma · Choose your language</p>
+  <div class="lang-btns">
+    <button class="lang-btn" data-lang="es">🇪🇸 Español</button>
+    <button class="lang-btn" data-lang="en">🇺🇸 English</button>
+  </div>
+</div>
+
+<!-- ===== COVER ===== -->
+<div id="cover" class="hidden">
+  <div class="cover-card">
+    <span class="envelope">✉️</span>
+    <div class="cover-kicker" data-t="coverKicker"></div>
+    <div class="cover-photo"><img id="coverPhoto" src="assets/moana-beach.jpg" alt="foto"></div>
+    <h1 id="coverName">Moana</h1>
+    <div class="cover-age" data-t="coverAge"></div>
+    <button class="tap-btn" id="openBtn" data-t="tapBtn"></button>
+    <div class="tap-hint" data-t="tapHint"></div>
+  </div>
+</div>
+
+<!-- ===== INVITATION ===== -->
+<main id="invite" class="hidden">
+
+  <!-- Welcome -->
+  <section class="section hero">
+    <img class="corner" src="assets/hibiscus-trio.jpg" style="top:-10px;right:-10px">
+    <span class="eyebrow" data-t="welcomeEyebrow"></span>
+    <div class="big-quote" data-t="welcomeQuote"></div>
+    <div class="name-frame">
+      <img id="heroPhoto" src="assets/moana-beach.jpg" alt="cumpleañera">
+      <div class="tag" id="heroTag">Moana</div>
+    </div>
+    <p data-t="welcomeSub"></p>
+  </section>
+
+  <!-- Event details -->
+  <section class="section">
+    <img class="corner" src="assets/shell.jpg" style="bottom:-14px;left:-14px;width:100px">
+    <span class="eyebrow" data-t="detailsEyebrow"></span>
+    <h2 data-t="detailsTitle"></h2>
+    <div class="info-grid">
+      <div class="info-card"><div class="ic">📅</div><div class="lbl" data-t="lblDate"></div><div class="val" id="valDate"></div></div>
+      <div class="info-card"><div class="ic">🕓</div><div class="lbl" data-t="lblTime"></div><div class="val" id="valTime"></div></div>
+      <div class="info-card wide"><div class="ic">📍</div><div class="lbl" data-t="lblPlace"></div><div class="val" id="valPlace"></div>
+        <a class="map-btn" id="mapBtn" target="_blank" rel="noopener"><span>🗺️</span><span data-t="mapBtn"></span></a>
+      </div>
+    </div>
+    <div class="cal-row">
+      <button class="cal-btn" id="icsBtn"><span>📅</span><span data-t="calBtn"></span></button>
+      <a class="cal-btn ghost" id="gcalBtn" target="_blank" rel="noopener"><span>📆</span><span data-t="gcalBtn"></span></a>
+    </div>
+  </section>
+
+  <!-- Dress code -->
+  <section class="section dress">
+    <span class="eyebrow" data-t="dressEyebrow"></span>
+    <h2 data-t="dressTitle"></h2>
+    <p data-t="dressBody"></p>
+    <div class="chars">
+      <div class="char"><img src="assets/pua-heihei.jpg" alt="Pua y HeiHei"><span data-t="dressChars"></span></div>
+    </div>
+    <p class="center" style="font-weight:600;color:var(--coral-d)" data-t="dressAsk"></p>
+    <div class="palette">
+      <div class="swatch" style="background:#f4a28c"></div>
+      <div class="swatch" style="background:#f6e7c8"></div>
+      <div class="swatch" style="background:#ffcba4"></div>
+      <div class="swatch" style="background:#2ec4b6"></div>
+      <div class="swatch" style="background:#e84b78"></div>
+    </div>
+  </section>
+
+  <!-- RSVP -->
+  <section class="section rsvp" id="rsvpSection">
+    <img class="corner" src="assets/te-fiti.jpg" style="top:-10px;right:-10px;width:90px;mix-blend-mode:normal;border-radius:50%">
+    <span class="eyebrow" data-t="rsvpEyebrow"></span>
+    <h2 data-t="rsvpTitle"></h2>
+    <p data-t="rsvpBody"></p>
+
+    <div id="rsvpForm">
+      <label data-t="phoneLabel"></label>
+      <input id="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="704-000-0000">
+      <div class="field-note" id="phoneNote"></div>
+
+      <div id="attendBlock" class="hidden">
+        <label data-t="attendLabel"></label>
+        <div class="seg" id="attendSeg">
+          <button data-att="yes" class="on" data-t="attYes"></button>
+          <button data-att="no" data-t="attNo"></button>
+        </div>
+      </div>
+
+      <div id="countBlock" class="hidden">
+        <label data-t="countLabel"></label>
+        <div class="count-row">
+          <button class="count-btn" id="minus">−</button>
+          <div class="count-val" id="countVal">1</div>
+          <button class="count-btn" id="plus">+</button>
+        </div>
+        <div class="count-cap" data-t="countCap"></div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" disabled data-t="submitBtn"></button>
+    </div>
+
+    <!-- Thank you state -->
+    <div id="thanksBlock" class="hidden thanks" style="padding:10px 0 0">
+      <div class="check">🌺</div>
+      <h2 id="thanksTitle" style="color:var(--tefiti-d)"></h2>
+      <p id="thanksMsg"></p>
+      <button class="decline-btn" id="editBtn" data-t="editBtn"></button>
+    </div>
+  </section>
+
+  <!-- Farewell -->
+  <section class="section farewell">
+    <div class="envelope" style="font-size:40px">🌊</div>
+    <h2 data-t="farewellTitle"></h2>
+    <p data-t="farewellBody"></p>
+    <div class="sig" data-t="farewellSig"></div>
+  </section>
+
+  <div class="footer">
+    <div data-t="footer"></div>
+  </div>
+</main>
+
+<div id="toast"></div>
+
+<script>
+/* =========================================================
+   CONFIG  — EDITA AQUÍ los datos reales del evento
+   ========================================================= */
+const CONFIG = {
+  babyName: "Zahirelys",             // nombre real de la bebé
+  photo: "assets/zahirelys.jpg",     // foto real (si aún no existe, usa el placeholder de abajo)
+  photoFallback: "assets/moana-beach.jpg",
+  date: { es: "Sábado 24 de Octubre, 2026", en: "Saturday, October 24, 2026" },
+  time: "4:00 PM – 9:30 PM",
+  place: {
+    es: "2000 Spencer Mountain Rd, Gastonia, NC 28054",
+    en: "2000 Spencer Mountain Rd, Gastonia, NC 28054",
+    address: "2000 Spencer Mountain Rd, Gastonia, NC 28054",
+    mapUrl: "https://www.google.com/maps/search/?api=1&query=2000%20Spencer%20Mountain%20Rd%2C%20Gastonia%2C%20NC%2028054"
+  },
+  // Para "Añadir al calendario". Horas en UTC (Gastonia NC = hora del Este, EDT = UTC-4 en octubre).
+  // 24 oct 2026, 4:00 PM EDT = 20:00 UTC ; 9:30 PM EDT = 01:30 UTC del día 25.
+  calendar: {
+    title: "Primer Añito de Zahirelys 🌺",
+    startUTC: "20261024T200000Z",
+    endUTC:   "20261025T013000Z",
+    details:  "¡Te esperamos para celebrar el primer añito de Zahirelys! Tema: Moana 🌊 Confirma en la invitación."
+  },
+  maxGuests: 6,                       // máximo de acompañantes permitidos
+  // Supabase: guarda confirmaciones. Si falla, usa almacenamiento local (demo).
+  // Proyecto dedicado: invitacion-moana
+  supabase: {
+    url: "https://piorsittmgrtxqoqgoqh.supabase.co",
+    key: "sb_publishable_NSXZDeyi5lAiRqZji1EBrg_kCuANRna",
+    table: "confirmaciones_moana"
+  }
+};
+
+/* Lista de invitados (nombre + teléfono).  Se valida por los 10 dígitos. */
+const GUESTS = [
+  ["Zohaira","9802330568"],["José Antonio","9802489842"],["José","9802487373"],
+  ["Gene","7042946675"],["Zahira","9803622971"],["Daniel","9802545966"],
+  ["Jennipher","9805986201"],["Leilanie","9803718715"],["Britany","7047338872"],
+  ["Yessimiel","8622629889"],["Rudy","7045823513"],["Richard","3479042664"],
+  ["Niovi","7049060475"],["Samuel","7047563575"],["Samiel","7047565602"],
+  ["Yemely","7042993082"],["Yarimiel","9802262560"],["José Manuel","7049987254"],
+  ["Celina","9804417852"],["Viviana","9803289838"],["Stephanie","7048998109"],
+  ["Manuel","7044930245"],["Nina","7042941287"],["Brandy","7042941867"],
+  ["Leidy","7042746280"],["Juan Pablo","7043406363"],["Eduardo","7045241881"],
+  ["Rey","7873261467"],["Brian","7045918766"]
+];
+
+/* =========================================================
+   i18n
+   ========================================================= */
+const I18N = {
+  es: {
+    coverKicker:"Estás invitad@ a",
+    coverAge:"¡Mi Primer Añito! 🌺",
+    tapBtn:"Abrir invitación 💌",
+    tapHint:"Toca para navegar hacia la fiesta 🌊",
+    welcomeEyebrow:"Bienvenid@ a bordo",
+    welcomeQuote:"“Hace 1 año llegué navegando a esta familia… ¡y ahora toca fiesta!”",
+    welcomeSub:"Súbete a la ola y acompáñame a celebrar mi primer añito. 💙",
+    detailsEyebrow:"La aventura",
+    detailsTitle:"¿Cuándo y dónde?",
+    lblDate:"Fecha", lblTime:"Hora", lblPlace:"Lugar",
+    mapBtn:"Ver en el mapa",
+    calBtn:"Añadir al calendario", gcalBtn:"Google Calendar",
+    dressEyebrow:"Código de vestimenta",
+    dressTitle:"Únete a la tripulación",
+    dressBody:"Moana necesita una tripulación especial. Ven vestid@ como parte de la aventura: colores tropicales, flores o motivos del océano. ¡Nuestra travesía será aún más especial con el espíritu de Moana!",
+    dressChars:"Púa & HeiHei",
+    dressAsk:"¿Eres más adorable como Púa o más divertid@ como HeiHei? 🐷🐔 ¡Demuéstralo con tu atuendo!",
+    rsvpEyebrow:"Confirma tu asistencia",
+    rsvpTitle:"¿Navegas con nosotros?",
+    rsvpBody:"Escribe tu número de teléfono (el que tenemos en la lista) para confirmar.",
+    phoneLabel:"Tu número de teléfono",
+    attendLabel:"¿Podrás acompañarnos?",
+    attYes:"¡Sí, ahí estaré! 🎉", attNo:"No podré 😢",
+    countLabel:"¿Cuántas personas van en total (incluyéndote)?",
+    countCap:"Tú + acompañantes",
+    submitBtn:"Confirmar 🌺",
+    editBtn:"Editar mi respuesta",
+    thanksYes:"¡Nos vemos en la fiesta!",
+    thanksYesMsg:"Gracias {name}. Confirmaste {n} {pers}. ¡Prepárate para navegar! 🌊",
+    thanksNo:"¡Te vamos a extrañar!",
+    thanksNoMsg:"Gracias por avisar, {name}. 💙",
+    farewellTitle:"Te esperamos",
+    farewellBody:"Ven a celebrar mi primer viaje por el océano de la vida.",
+    farewellSig:"Con amor, "+"{name} 💙",
+    footer:"Hecho con 🌺 para "+"{name}",
+    persSingular:"persona", persPlural:"personas",
+    errNotFound:"Hmm, no encontramos ese número en la lista. Revísalo o escríbele al anfitrión.",
+    okFound:"¡Hola {name}! 👋",
+    needAttend:"Elige si podrás asistir.",
+    savedOffline:"Confirmación guardada (modo demo)."
+  },
+  en: {
+    coverKicker:"You're invited to",
+    coverAge:"My First Birthday! 🌺",
+    tapBtn:"Open invitation 💌",
+    tapHint:"Tap to sail to the party 🌊",
+    welcomeEyebrow:"Welcome aboard",
+    welcomeQuote:"“One year ago I sailed into this family… and now it's time to party!”",
+    welcomeSub:"Hop on the wave and join me to celebrate my first birthday. 💙",
+    detailsEyebrow:"The adventure",
+    detailsTitle:"When & where?",
+    lblDate:"Date", lblTime:"Time", lblPlace:"Place",
+    mapBtn:"Open in maps",
+    calBtn:"Add to calendar", gcalBtn:"Google Calendar",
+    dressEyebrow:"Dress code",
+    dressTitle:"Join the crew",
+    dressBody:"Moana needs a special crew. Come dressed as part of the adventure: tropical colors, flowers or ocean motifs. Our voyage will be even more special with the spirit of Moana!",
+    dressChars:"Pua & HeiHei",
+    dressAsk:"Are you more adorable like Pua or more fun like HeiHei? 🐷🐔 Show it with your outfit!",
+    rsvpEyebrow:"RSVP",
+    rsvpTitle:"Will you sail with us?",
+    rsvpBody:"Enter your phone number (the one we have on the guest list) to confirm.",
+    phoneLabel:"Your phone number",
+    attendLabel:"Can you make it?",
+    attYes:"Yes, I'll be there! 🎉", attNo:"Can't make it 😢",
+    countLabel:"How many people total (including you)?",
+    countCap:"You + guests",
+    submitBtn:"Confirm 🌺",
+    editBtn:"Edit my response",
+    thanksYes:"See you at the party!",
+    thanksYesMsg:"Thanks {name}. You confirmed {n} {pers}. Get ready to sail! 🌊",
+    thanksNo:"We'll miss you!",
+    thanksNoMsg:"Thanks for letting us know, {name}. 💙",
+    farewellTitle:"We're waiting for you",
+    farewellBody:"Come celebrate my first voyage across the ocean of life.",
+    farewellSig:"With love, "+"{name} 💙",
+    footer:"Made with 🌺 for "+"{name}",
+    persSingular:"person", persPlural:"people",
+    errNotFound:"Hmm, we couldn't find that number on the list. Please check it or text the host.",
+    okFound:"Hi {name}! 👋",
+    needAttend:"Please choose if you can attend.",
+    savedOffline:"RSVP saved (demo mode)."
+  }
+};
+
+/* =========================================================
+   State + helpers
+   ========================================================= */
+let LANG = "es";
+let matchedGuest = null;   // [name, phone]
+let attending = "yes";
+let count = 1;
+
+const digits = s => (s||"").replace(/\D/g,"").replace(/^1/,"").slice(-10);
+const T = k => (I18N[LANG][k] || k);
+const fmt = (s,o)=> s.replace(/\{(\w+)\}/g,(_,k)=>o[k]!=null?o[k]:"");
+const $ = s => document.querySelector(s);
+const $$ = s => document.querySelectorAll(s);
+
+let sb=null;
+try{ sb = window.supabase.createClient(CONFIG.supabase.url, CONFIG.supabase.key); }catch(e){}
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),3200); }
+
+/* ===== Añadir al calendario ===== */
+function icsContent(){
+  const c=CONFIG.calendar, loc=(CONFIG.place.address||CONFIG.place.es).replace(/,/g,"\\,");
+  return [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Zahirelys//Invitacion Moana//ES","CALSCALE:GREGORIAN",
+    "BEGIN:VEVENT","UID:zahirelys-primer-anito@invitacion","DTSTAMP:"+c.startUTC,
+    "DTSTART:"+c.startUTC,"DTEND:"+c.endUTC,
+    "SUMMARY:"+c.title,"LOCATION:"+loc,"DESCRIPTION:"+c.details,
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+}
+function downloadICS(){
+  const blob=new Blob([icsContent()],{type:"text/calendar;charset=utf-8"});
+  const url=URL.createObjectURL(blob), a=document.createElement("a");
+  a.href=url; a.download="Zahirelys-Primer-Anito.ics"; document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 800);
+}
+function gcalUrl(){
+  const c=CONFIG.calendar;
+  const p=new URLSearchParams({ action:"TEMPLATE", text:c.title, dates:c.startUTC+"/"+c.endUTC,
+    details:c.details, location:(CONFIG.place.address||CONFIG.place.es) });
+  return "https://calendar.google.com/calendar/render?"+p.toString();
+}
+
+/* apply translations + config to DOM */
+function applyLang(){
+  document.documentElement.lang = LANG;
+  $$("[data-t]").forEach(el=>{
+    let key = el.getAttribute("data-t");
+    let val = T(key);
+    val = fmt(val, {name: CONFIG.babyName});
+    el.textContent = val;
+  });
+  // config-driven fields
+  $("#coverName").textContent = CONFIG.babyName;
+  $("#heroTag").textContent = CONFIG.babyName;
+  $("#valDate").textContent = CONFIG.date[LANG];
+  $("#valTime").textContent = CONFIG.time;
+  $("#valPlace").textContent = CONFIG.place[LANG];
+  $("#mapBtn").href = CONFIG.place.mapUrl;
+  $("#gcalBtn").href = gcalUrl();
+  [ "#coverPhoto", "#heroPhoto" ].forEach(sel=>{
+    const im = $(sel); if(!im) return;
+    im.onerror = ()=>{ im.onerror=null; im.src = CONFIG.photoFallback; };
+    im.src = CONFIG.photo;
+  });
+}
+
+/* =========================================================
+   Flow: gate -> cover -> invite
+   ========================================================= */
+$$(".lang-btn").forEach(b=> b.addEventListener("click",()=>{
+  LANG = b.getAttribute("data-lang");
+  applyLang();
+  $("#gate").classList.add("hidden");
+  $("#cover").classList.remove("hidden");
+}));
+
+$("#openBtn").addEventListener("click",()=>{
+  $("#cover").classList.add("hidden");
+  $("#invite").classList.remove("hidden");
+  window.scrollTo({top:0});
+  revealSections();
+  tryPlayMusic();
+});
+
+/* reveal on scroll */
+function revealSections(){
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} });
+  },{threshold:.12});
+  $$(".section").forEach(s=>io.observe(s));
+}
+
+/* =========================================================
+   Music
+   ========================================================= */
+let musicOn=false;
+// Se llama al tocar "Abrir invitación" (gesto del usuario) => el navegador permite el sonido
+function tryPlayMusic(){
+  const a=$("#audio");
+  a.volume=0.7;
+  a.play().then(()=>{ musicOn=true; $("#music").textContent="🔊"; }).catch(()=>{ /* si el navegador lo bloquea, queda el botón */ });
+}
+$("#music").addEventListener("click",()=>{
+  const a=$("#audio");
+  if(musicOn){ a.pause(); $("#music").textContent="🔈"; }
+  else{ a.play().catch(()=>{}); $("#music").textContent="🔊"; }
+  musicOn=!musicOn;
+});
+
+/* =========================================================
+   RSVP logic
+   ========================================================= */
+const phoneEl=$("#phone"), phoneNote=$("#phoneNote");
+const attendBlock=$("#attendBlock"), countBlock=$("#countBlock"), submitBtn=$("#submitBtn");
+
+phoneEl.addEventListener("input",()=>{
+  const d = digits(phoneEl.value);
+  matchedGuest = GUESTS.find(g=>g[1]===d) || null;
+  if(d.length<10){ phoneNote.textContent=""; phoneNote.className="field-note"; lockForm(); return; }
+  if(matchedGuest){
+    phoneNote.textContent = fmt(T("okFound"),{name:matchedGuest[0]});
+    phoneNote.className="field-note ok";
+    attendBlock.classList.remove("hidden");
+    updateFormState();
+  }else{
+    phoneNote.textContent = T("errNotFound");
+    phoneNote.className="field-note err";
+    lockForm();
+  }
+});
+
+function lockForm(){ attendBlock.classList.add("hidden"); countBlock.classList.add("hidden"); submitBtn.disabled=true; }
+
+/* attend segmented control */
+$$("#attendSeg button").forEach(b=> b.addEventListener("click",()=>{
+  $$("#attendSeg button").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on");
+  attending = b.getAttribute("data-att");
+  updateFormState();
+}));
+
+function updateFormState(){
+  if(!matchedGuest){ lockForm(); return; }
+  if(attending==="yes"){ countBlock.classList.remove("hidden"); }
+  else { countBlock.classList.add("hidden"); }
+  submitBtn.disabled=false;
+}
+
+/* counter */
+$("#plus").addEventListener("click",()=>{ if(count<CONFIG.maxGuests){count++; renderCount();} });
+$("#minus").addEventListener("click",()=>{ if(count>1){count--; renderCount();} });
+function renderCount(){ $("#countVal").textContent=count; $("#minus").disabled=count<=1; $("#plus").disabled=count>=CONFIG.maxGuests; }
+renderCount();
+
+/* submit */
+submitBtn.addEventListener("click", async ()=>{
+  if(!matchedGuest) return;
+  submitBtn.disabled=true;
+  const record = {
+    name: matchedGuest[0],
+    phone: matchedGuest[1],
+    attending: attending==="yes",
+    party_size: attending==="yes"? count : 0,
+    lang: LANG,
+    updated_at: new Date().toISOString()
+  };
+  let saved=false;
+  if(sb){
+    try{
+      // upsert por teléfono: si ya confirmó, actualiza su respuesta
+      const { error } = await sb.from(CONFIG.supabase.table)
+        .upsert([record], { onConflict: "phone" });
+      if(!error) saved=true;
+    }catch(e){}
+  }
+  if(!saved){
+    // fallback demo: localStorage
+    const arr = JSON.parse(localStorage.getItem("rsvp_moana")||"[]");
+    arr.push(record); localStorage.setItem("rsvp_moana", JSON.stringify(arr));
+    toast(T("savedOffline"));
+  }
+  showThanks(record);
+});
+
+function showThanks(rec){
+  $("#rsvpForm").classList.add("hidden");
+  const tb=$("#thanksBlock"); tb.classList.remove("hidden");
+  if(rec.attending){
+    const pers = rec.party_size===1 ? T("persSingular") : T("persPlural");
+    $("#thanksTitle").textContent = T("thanksYes");
+    $("#thanksMsg").textContent = fmt(T("thanksYesMsg"),{name:rec.name, n:rec.party_size, pers});
+    $(".thanks .check").textContent = "🎉";
+  }else{
+    $("#thanksTitle").textContent = T("thanksNo");
+    $("#thanksMsg").textContent = fmt(T("thanksNoMsg"),{name:rec.name});
+    $(".thanks .check").textContent = "💙";
+  }
+}
+
+$("#editBtn").addEventListener("click",()=>{
+  $("#thanksBlock").classList.add("hidden");
+  $("#rsvpForm").classList.remove("hidden");
+});
+
+$("#icsBtn").addEventListener("click", downloadICS);
+
+/* init default lang render (in case) */
+applyLang();
+</script>
+</body>
+</html>

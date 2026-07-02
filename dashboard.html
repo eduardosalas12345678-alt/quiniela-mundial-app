@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Confirmaciones · Moana 🌺</title>
+<meta name="theme-color" content="#0e7c86" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--teal:#2ec4b6;--teal-d:#0e7c86;--teal-dd:#08596a;--coral:#f4a28c;--coral-d:#e8795f;
+  --hibiscus:#e84b78;--tefiti:#4caf50;--sun:#f5b301;--ink:#26333a;--muted:#6b8790;--line:#dceef1;--card:#fff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{font-family:"Fredoka",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+  background:linear-gradient(180deg,#7fd8e8,#38b6c9 40%,#0e7c86);min-height:100vh}
+h1,h2{font-family:"Berkshire Swash",cursive;font-weight:400;margin:0}
+button{font-family:inherit;cursor:pointer;border:0}
+.wrap{max-width:820px;margin:0 auto;padding:20px 14px 60px}
+header{display:flex;align-items:center;justify-content:space-between;color:#fff;padding:8px 4px 16px;gap:10px;flex-wrap:wrap}
+header h1{font-size:30px;text-shadow:0 3px 12px rgba(3,40,55,.4)}
+header .sub{font-size:13px;opacity:.9}
+.btn{background:#fff;color:var(--teal-d);font-weight:600;padding:10px 16px;border-radius:12px;box-shadow:0 6px 16px rgba(0,0,0,.15)}
+.btn.ghost{background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border-radius:18px;padding:16px 10px;text-align:center;box-shadow:0 10px 24px rgba(8,60,80,.18)}
+.stat .n{font-size:30px;font-weight:700;line-height:1}
+.stat .l{font-size:11px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-top:6px;font-weight:600}
+.stat.people .n{color:var(--teal-d)} .stat.yes .n{color:var(--tefiti)} .stat.no .n{color:var(--hibiscus)} .stat.pend .n{color:var(--sun)}
+.card{background:var(--card);border-radius:20px;padding:16px;box-shadow:0 10px 24px rgba(8,60,80,.18);margin-bottom:16px}
+.card h2{font-size:20px;color:var(--teal-d);margin-bottom:10px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tab{background:#eef7f8;color:var(--teal-dd);font-weight:600;font-size:13px;padding:8px 14px;border-radius:999px}
+.tab.on{background:var(--teal-d);color:#fff}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted)}
+td.num{text-align:center;font-weight:700}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600}
+.pill.yes{background:#e3f7e8;color:#237a34}.pill.no{background:#fde4ec;color:#b02657}.pill.pend{background:#fff3d6;color:#a5760a}
+.muted{color:var(--muted)} .center{text-align:center}
+.search{width:100%;padding:12px 14px;border:2px solid var(--line);border-radius:12px;font-size:15px;margin-bottom:10px;font-family:inherit}
+.search:focus{outline:none;border-color:var(--teal)}
+/* gate */
+#gate{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(180deg,#38b6c9,#0e7c86)}
+.gate-card{background:#fff;border-radius:22px;padding:28px 22px;width:min(360px,92vw);text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.3)}
+.gate-card h2{font-size:26px;color:var(--teal-d);margin-bottom:6px}
+.gate-card input{width:100%;padding:14px;border:2px solid var(--line);border-radius:12px;font-size:16px;margin:14px 0;text-align:center;font-family:inherit}
+.gate-card .btn{width:100%;justify-content:center;background:var(--teal-d);color:#fff}
+.err{color:var(--hibiscus);font-size:13px;min-height:18px}
+.foot{color:#eafaff;text-align:center;font-size:12px;margin-top:10px;opacity:.85}
+@media(max-width:560px){.stats{grid-template-columns:repeat(2,1fr)}header h1{font-size:24px}}
+</style>
+</head>
+<body>
+
+<!-- Passcode gate (protección ligera, del lado del cliente) -->
+<div id="gate">
+  <div class="gate-card">
+    <h2>🌺 Confirmaciones</h2>
+    <div class="muted">Panel privado de Zahira</div>
+    <input id="pass" type="password" placeholder="Contraseña" autocomplete="off">
+    <div class="err" id="passErr"></div>
+    <button class="btn" id="enterBtn">Entrar</button>
+  </div>
+</div>
+
+<div class="wrap" id="app" style="display:none">
+  <header>
+    <div>
+      <h1>Confirmaciones 🌺</h1>
+      <div class="sub">Primer añito · tema Moana</div>
+    </div>
+    <button class="btn ghost" id="refreshBtn">↻ Actualizar</button>
+  </header>
+
+  <div class="stats">
+    <div class="stat people"><div class="n" id="sPeople">–</div><div class="l">Personas en total</div></div>
+    <div class="stat yes"><div class="n" id="sYes">–</div><div class="l">Confirmaron</div></div>
+    <div class="stat no"><div class="n" id="sNo">–</div><div class="l">No asisten</div></div>
+    <div class="stat pend"><div class="n" id="sPend">–</div><div class="l">Sin responder</div></div>
+  </div>
+
+  <div class="card">
+    <div class="tabs">
+      <button class="tab on" data-f="all">Todos</button>
+      <button class="tab" data-f="yes">Asisten ✅</button>
+      <button class="tab" data-f="no">No asisten ✖</button>
+      <button class="tab" data-f="pend">Pendientes ⏳</button>
+    </div>
+    <input class="search" id="search" placeholder="Buscar por nombre o teléfono…">
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Invitado</th><th>Teléfono</th><th>Estado</th><th class="num">Personas</th><th>Cuándo</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="5" class="center muted">Cargando…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="foot">Actualiza la página para ver nuevas confirmaciones en tiempo real.</div>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+const CONFIG = {
+  passcode: "moana2026",   // TODO: cambia esta contraseña
+  // Proyecto dedicado: invitacion-moana
+  supabase: {
+    url: "https://piorsittmgrtxqoqgoqh.supabase.co",
+    key: "sb_publishable_NSXZDeyi5lAiRqZji1EBrg_kCuANRna",
+    table: "confirmaciones_moana"
+  }
+};
+
+/* Lista completa de invitados (para calcular pendientes) */
+const GUESTS = [
+  ["Zohaira","9802330568"],["José Antonio","9802489842"],["José","9802487373"],
+  ["Gene","7042946675"],["Zahira","9803622971"],["Daniel","9802545966"],
+  ["Jennipher","9805986201"],["Leilanie","9803718715"],["Britany","7047338872"],
+  ["Yessimiel","8622629889"],["Rudy","7045823513"],["Richard","3479042664"],
+  ["Niovi","7049060475"],["Samuel","7047563575"],["Samiel","7047565602"],
+  ["Yemely","7042993082"],["Yarimiel","9802262560"],["José Manuel","7049987254"],
+  ["Celina","9804417852"],["Viviana","9803289838"],["Stephanie","7048998109"],
+  ["Manuel","7044930245"],["Nina","7042941287"],["Brandy","7042941867"],
+  ["Leidy","7042746280"],["Juan Pablo","7043406363"],["Eduardo","7045241881"],
+  ["Rey","7873261467"],["Brian","7045918766"]
+];
+
+const $=s=>document.querySelector(s);
+const fmtPhone=p=>p&&p.length===10?`${p.slice(0,3)}-${p.slice(3,6)}-${p.slice(6)}`:p;
+let sb=null; try{ sb=window.supabase.createClient(CONFIG.supabase.url,CONFIG.supabase.key);}catch(e){}
+let DATA=[]; let filter="all"; let query="";
+
+/* ===== gate ===== */
+function tryEnter(){
+  if($("#pass").value===CONFIG.passcode){
+    sessionStorage.setItem("moana_dash","1");
+    $("#gate").style.display="none"; $("#app").style.display="block"; load();
+  }else{ $("#passErr").textContent="Contraseña incorrecta"; }
+}
+$("#enterBtn").addEventListener("click",tryEnter);
+$("#pass").addEventListener("keydown",e=>{if(e.key==="Enter")tryEnter();});
+if(sessionStorage.getItem("moana_dash")==="1"){ $("#gate").style.display="none"; $("#app").style.display="block"; }
+
+/* ===== data ===== */
+async function load(){
+  let rows=[];
+  if(sb){
+    try{
+      const {data,error}=await sb.from(CONFIG.supabase.table).select("*").order("updated_at",{ascending:false});
+      if(!error&&data) rows=data;
+    }catch(e){}
+  }
+  // fallback demo (localStorage de la misma máquina que confirmó)
+  if(!rows.length){
+    try{ rows=JSON.parse(localStorage.getItem("rsvp_moana")||"[]"); }catch(e){}
+  }
+  DATA=rows; render();
+}
+$("#refreshBtn").addEventListener("click",load);
+if($("#app").style.display==="block") load();
+
+/* ===== filters ===== */
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  t.classList.add("on"); filter=t.getAttribute("data-f"); render();
+}));
+$("#search").addEventListener("input",e=>{query=e.target.value.toLowerCase().trim();render();});
+
+/* ===== render ===== */
+function render(){
+  const byPhone={}; DATA.forEach(r=>{byPhone[r.phone]=r;});
+  const yes=DATA.filter(r=>r.attending);
+  const no=DATA.filter(r=>!r.attending);
+  const people=yes.reduce((a,r)=>a+(r.party_size||0),0);
+  const responded=new Set(DATA.map(r=>r.phone));
+  const pending=GUESTS.filter(g=>!responded.has(g[1]));
+
+  $("#sPeople").textContent=people;
+  $("#sYes").textContent=yes.length;
+  $("#sNo").textContent=no.length;
+  $("#sPend").textContent=pending.length;
+
+  // build unified list
+  let list=[];
+  if(filter==="all"||filter==="yes"||filter==="no"){
+    DATA.forEach(r=>{
+      if(filter==="yes"&&!r.attending)return;
+      if(filter==="no"&&r.attending)return;
+      list.push({name:r.name,phone:r.phone,status:r.attending?"yes":"no",size:r.attending?(r.party_size||1):0,when:r.updated_at||r.created_at});
+    });
+  }
+  if(filter==="all"||filter==="pend"){
+    pending.forEach(g=>list.push({name:g[0],phone:g[1],status:"pend",size:0,when:null}));
+  }
+  if(query){ list=list.filter(x=>x.name.toLowerCase().includes(query)||x.phone.includes(query.replace(/\D/g,""))); }
+
+  const statusPill={yes:'<span class="pill yes">Asiste</span>',no:'<span class="pill no">No asiste</span>',pend:'<span class="pill pend">Pendiente</span>'};
+  const rowsEl=$("#rows");
+  if(!list.length){ rowsEl.innerHTML='<tr><td colspan="5" class="center muted">Sin resultados</td></tr>'; return; }
+  rowsEl.innerHTML=list.map(x=>{
+    const when=x.when?new Date(x.when).toLocaleString('es-MX',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'—';
+    return `<tr>
+      <td><b>${x.name}</b></td>
+      <td class="muted">${fmtPhone(x.phone)}</td>
+      <td>${statusPill[x.status]}</td>
+      <td class="num">${x.status==='yes'?x.size:'—'}</td>
+      <td class="muted">${when}</td>
+    </tr>`;
+  }).join("");
+}
+</script>
+</body>
+</html>
